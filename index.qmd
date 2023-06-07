@@ -1975,51 +1975,6 @@ plot_grid(MonNuageCouleurAxe, MonNuageCouleur, ncol = 1, align = "v")
 
 Pour en savoir plus : <https://cran.r-project.org/web/packages/cowplot/vignettes/introduction.html>
 
-## Interactivité
-
-```{r}
-library(plotly)
-```
-
-L'utilisation de `ggplot2` avec `plotly`  n'est pas obligatoire, mais maintenant que l'on connaît, on ne va quand même pas s'en priver.
-
-Alors allons-y !
-
-
-```{r}
-#| fig-align: center
-#| fig-width: 6
-#| fig-height: 4
-ggplotly(MonNuageCouleur)
-```
-
-Il n'y a plus qu'à promener sa souris sur le graphique pour voir ce que cela donne.
-
-## Interactivité
-
-En explorant un peu l'aide en ligne, on peut gérer ce qui apparaît sous le curseur de la souris quand on le déplace.
-
-::: {.panel-tabset}
-
-## Valeurs des coordonnées `x` et `y`
-
-```{r}
-#| fig-align: center
-#| fig-width: 6
-#| fig-height: 4
-ggplotly(MonNuageCouleur, tooltip = c("x","y"))
-```
-
-## Valeurs des couleurs
-
-```{r}
-#| fig-align: center
-#| fig-width: 6
-#| fig-height: 4
-ggplotly(MonNuageCouleur, tooltip = c("colour"))
-```
-
-::: 
 
 ## `ggforce`
 
@@ -2089,13 +2044,18 @@ penguins %>%
 
 ## `ggforce::facet_matrix()`
 
-:::: .columns
+:::: {.columns}
 
-::: .column
+::: {.column}
+
+```{r}
 iris
+```
+
+
 :::
 
-::: .column
+::: {.column}
 ```{r,fig.align='center',fig.height=6,fig.width=12}
 iris %>% ggplot() +
   geom_boxplot(aes(x = .panel_x, y = .panel_y, fill=Species)) +
@@ -2134,6 +2094,51 @@ ggplot(penguins %>% drop_na(), aes(bill_depth_mm, body_mass_g)) +
 > From: https://ihaddadenfodil.com/post/it-s-a-bird-it-s-a-plane-it-s-a-ggforce-function/
 
 
+## Interactivité
+
+```{r}
+library(plotly)
+```
+
+L'utilisation de `ggplot2` avec `plotly`  n'est pas obligatoire, mais maintenant que l'on connaît, on ne va quand même pas s'en priver.
+
+Alors allons-y !
+
+
+```{r}
+#| fig-align: center
+#| fig-width: 6
+#| fig-height: 4
+ggplotly(MonNuageCouleur)
+```
+
+Il n'y a plus qu'à promener sa souris sur le graphique pour voir ce que cela donne.
+
+## Interactivité
+
+En explorant un peu l'aide en ligne, on peut gérer ce qui apparaît sous le curseur de la souris quand on le déplace.
+
+::: {.panel-tabset}
+
+## Valeurs des coordonnées `x` et `y`
+
+```{r}
+#| fig-align: center
+#| fig-width: 6
+#| fig-height: 4
+ggplotly(MonNuageCouleur, tooltip = c("x","y"))
+```
+
+## Valeurs des couleurs
+
+```{r}
+#| fig-align: center
+#| fig-width: 6
+#| fig-height: 4
+ggplotly(MonNuageCouleur, tooltip = c("colour"))
+```
+
+::: 
 
 ## Interactivité
 
