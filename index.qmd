@@ -1,0 +1,2202 @@
+---
+title: "Graphiques avec R : ggplot2"
+author: "Vincent ROCHER & Sébastien Déjean"
+date: "9/06/2023"
+format: 
+  revealjs:
+    fontsize: 24px
+    width: 1400
+    fig-align: center
+editor: source
+execute:
+  echo: true
+---
+
+```{r setup, include=FALSE}
+require(knitr)
+require(kableExtra)
+require(tidyverse)
+require(palmerpenguins)
+require(tidyr)
+
+penguins <- palmerpenguins::path_to_file(path = "penguins.csv") %>% read_csv()
+options(kableExtra.latex.load_packages = FALSE)
+options(knitr.table.format = "html")
+knitr::opts_chunk$set(dev = 'svg',fig.retina = 3, warning = FALSE, message = FALSE) # set output device to svg
+```
+
+## Préambule
+
+### Prerequisites:
+
+-   Use R on a regular basis
+-   Forget all you know about plots in R without ggplot
+
+### Goals :
+
+-   Understand the logic behing the grammar of graphics (gg of ggplot2)
+-   Get started with ggplot2
+-   Learn to get things done
+-   Have fun!
+
+## Grammar of Graphics
+
+::: callout-note
+**Grammaire** : nom féminin, XIIe siècle. Dérivé du latin grammatica, emprunté du grec grammatikê, « grammaire, culture ». Ensemble des règles qui forment le système d'une langue et que l'on doit suivre pour parler ou écrire conformément à l'usage (Dictionnaire de l'académie Française, 9e édition)
+:::
+
+Grammar gives language rules. Wilkinson 2005
+
+## Grammar of Graphics
+
+### Set of rules to go from a data table to a plot
+
+::: columns
+::: column
+#### Variable space
+
+```{r, echo=F,results='asis'}
+
+one_data <- data.frame(
+A = c(2:7),
+B = c(14,15,21,18,13,12),
+C = c(rep("O",2),rep("N",3),rep("O",1))
+)
+
+kable(one_data,caption = "some data") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+:::
+
+::: column
+#### Plot
+
+```{r}
+#| echo: false
+
+p_one_data <- ggplot(data=one_data,aes(x=A,y=B,col=C,shape=C)) + geom_point()
+print(p_one_data)
+```
+:::
+:::
+
+## Grammar of Graphics
+
+::: columns
+::: {.column width="20%"}
+#### Variable space
+
+```{r, echo=F,results='asis'}
+
+one_data <- data.frame(
+A = c(2:7),
+B = c(14,15,21,18,13,12),
+C = c(rep("O",2),rep("N",3),rep("O",1))
+)
+
+kable(one_data,caption = "some data") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+:::
+
+::: {.column width="40%"}
+#### Aesthetic space
+
+```{r, echo=F,results='asis'}
+aes_vals <- ggplot_build(p_one_data)$data[[1]]
+
+kable(aes_vals) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+
+```
+:::
+
+::: {.column width="40%"}
+#### Plot
+
+```{r}
+#| echo: false
+
+ggplot(data=one_data,aes(x=A,y=B,col=C,shape=C)) + geom_point()
+```
+:::
+:::
+
+> The grammar tells us that a statistical graphic is a mapping from data to aesthetic attributes (colour, shape, size) of geometric objects (points, lines, bars).[^1]
+
+[^1]: H. Wickham. ggplot2: Elegant Graphics for Data Analysis. Use R!, Springer https://ggplot2-book.org
+
+## Aesthetics & Scales
+
+### Aesthetics
+
+-   Properties that can be perceived on the graphic: **location, colour, shape, size**
+
+-   Each aesthetic can be mapped to a variable or set to a constant value
+
+::: fragment
+### Scales
+
+### Controls the mapping from data to aesthetics
+
+-   Scale : function from a region in data space to a region in aesthetic space.
+-   Without a scale, there is no way to go from the data to aesthetics so **a scale is required for every aesthetics used on the plot**
+-   For position aesthetics, the axes are the guides, for all other aesthetics, legends do the job
+:::
+
+## Geometric object (layer)
+
+### *Layers are responsible for creating the objects that we perceive on the plot.*
+
+### *The plot is not ready to be displayed until at least one layer is added.*
+
+### Minimal layer: specify a geom
+
+-   Performs the actual rendering of the layer
+-   Control the type of plot that you create
+
+## Layered Grammar of Graphics
+
+-   **Defaults**
+    -   Data
+    -   Mapping from variables to aesthetics
+-   **Layer**
+-   [Data (optional, if already defined)]{style="color:gray;"}
+-   [Mapping (optional, if already defined)]{style="color:gray;"}
+-   Geometric object
+-   Statistical transformation
+-   Position adjustement
+-   **Scale**: controls the mapping from data to aesthetic attributes, one scale or each aesthetic property
+-   <b>Coord</b>inate system
+-   **Facet** specification : to build the same plot for different subsets of the dataset
+
+## `ggplot2`: a plot is an object
+
+::: columns
+::: {.column width="50%"}
+### A plot object is a list with:
+
+-   Data (stored in the plot object)
+-   Mapping
+-   Layers
+-   Scales
+-   Coordinates
+-   Facet
+:::
+
+::: {.column width="50%"}
+::: fragment
+```{r}
+#| echo: false
+
+str(p_one_data)
+
+```
+:::
+:::
+:::
+
+## `ggplot2`: data
+
+```{r,fig.align='center'}
+MyPlot <- ggplot(data=iris)
+MyPlot
+```
+
+## `ggplot2`: aesthetics
+
+```{r,fig.align='center'}
+MyPlot <- ggplot(data=iris,aes(x=Petal.Length,y=Petal.Width,colour=Species))
+MyPlot
+```
+
+## `ggplot2`: layer with geom
+
+```{r,fig.align='center'}
+MyPlot <- MyPlot + geom_point()
+MyPlot
+```
+
+## `ggplot2` training
+
+```{r,echo=F,warning=F,message=F,fig.align='center',fig.height=6,fig.width=14}
+require(ggbump)
+data_progression <- tibble(
+  Parts = c("Read data","Manipulate Data","Plot data","Customize<br>your plots"),
+  Tools = c("readr","dplyr/tidyr","ggplot2","ggplot2<br>extensions")
+) %>% mutate(order = 1:dplyr::n(),rank = rep(1,dplyr::n()))
+
+data_begin_end <- tibble(
+  x=c(0.55,4.55),y=c(1,1),label = c("Data","Descriptive<br>statistics")
+)
+
+my_color <- "#2980b9"
+p0.training <- data_progression %>% ggplot(aes(order,rank,label = order)) + geom_bump(smooth = 15, size = 2, alpha = 1,col=my_color) + geom_point(col=my_color,alpha=1,size=10) +
+  geom_text(col="white", fontface = "bold",size=6) +
+  coord_cartesian(clip = 'off') +
+  ggtext::geom_richtext(aes(label = Tools),vjust=-1,color=my_color,size=5) +
+  ggtext::geom_richtext(data=data_begin_end,aes(x=x,y=y,label = label),fontface = "bold",inherit.aes = F,size=5,fill = NA, label.color = NA,) +
+  theme(
+        legend.position = "none",
+        panel.grid = element_blank(),
+        plot.title = element_text(hjust = .5, color = "white"),
+        plot.caption = element_text(hjust = 1, color = "white", size = 8),
+        plot.subtitle = element_text(hjust = .5, color = "white", size = 10),
+        axis.line = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title = element_blank(),
+        axis.text.x = ggtext::element_markdown(face = 2, color = "black",size = 14),
+        panel.background = element_rect(fill = "white"),
+        plot.background = element_rect(fill = "white")) +
+  scale_x_continuous(breaks = data_progression$order %>% unique() %>% sort(),
+                     labels = data_progression %>% distinct(order, Parts) %>% arrange(order) %>% pull(Parts))
+
+p1.training <- filter(data_progression,order==1) %>% ggplot(aes(order,rank,label = order)) +
+  geom_bump(data= data_progression,smooth = 15, size = 2,col=my_color,alpha=0.4) +
+  geom_point(col=my_color,alpha=1,size=10) +
+  geom_text(col="white", fontface = "bold",size=6,alpha=1) +
+  ggtext::geom_richtext(data=data_begin_end,aes(x=x,y=y,label = label),fontface = "bold",inherit.aes = F,size=5,fill = NA, label.color = NA,) +
+  coord_cartesian(clip = 'off') +
+  ggtext::geom_richtext(aes(label = Tools),vjust=-1,color=my_color,size=5,alpha=1) +
+  
+  theme(
+        legend.position = "none",
+        panel.grid = element_blank(),
+        plot.title = element_text(hjust = .5, color = "white"),
+        plot.caption = element_text(hjust = 1, color = "white", size = 8),
+        plot.subtitle = element_text(hjust = .5, color = "white", size = 10),
+        axis.line = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title = element_blank(),
+        axis.text.x = ggtext::element_markdown(face = 2, color = "black",size = 14),
+        panel.background = element_rect(fill = "white"),
+        plot.background = element_rect(fill = "white")) +
+  scale_x_continuous(breaks = data_progression$order %>% unique() %>% sort(),
+                     labels = data_progression %>% distinct(order, Parts) %>% arrange(order) %>% pull(Parts))
+p2.training <- filter(data_progression,order<=2) %>% ggplot(aes(order,rank,label = order)) +
+  geom_bump(data= data_progression,smooth = 15, size = 2,col=my_color,alpha=0.4) +
+  geom_bump(smooth = 15, size = 2,col=my_color,alpha=1) +
+  geom_point(col=my_color,alpha=1,size=10) +
+  geom_text(col="white", fontface = "bold",size=6,alpha=1) +
+  ggtext::geom_richtext(data=data_begin_end,aes(x=x,y=y,label = label),fontface = "bold",inherit.aes = F,size=5,fill = NA, label.color = NA,) +
+  coord_cartesian(clip = 'off') +
+  ggtext::geom_richtext(aes(label = Tools),vjust=-1,color=my_color,size=5,alpha=1) +
+  
+  theme(
+        legend.position = "none",
+        panel.grid = element_blank(),
+        plot.title = element_text(hjust = .5, color = "white"),
+        plot.caption = element_text(hjust = 1, color = "white", size = 8),
+        plot.subtitle = element_text(hjust = .5, color = "white", size = 10),
+        axis.line = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title = element_blank(),
+        axis.text.x = ggtext::element_markdown(face = 2, color = "black",size = 14),
+        panel.background = element_rect(fill = "white"),
+        plot.background = element_rect(fill = "white")) +
+  scale_x_continuous(breaks = data_progression$order %>% unique() %>% sort(),
+                     labels = data_progression %>% distinct(order, Parts) %>% arrange(order) %>% pull(Parts))
+
+p3.training <- filter(data_progression,order<=3) %>% ggplot(aes(order,rank,label = order)) +
+  geom_bump(data= data_progression,smooth = 15, size = 2,col=my_color,alpha=0.4) +
+  geom_bump(smooth = 15, size = 2,col=my_color,alpha=1) +
+  geom_point(col=my_color,alpha=1,size=10) +
+  geom_text(col="white", fontface = "bold",size=6,alpha=1) +
+  ggtext::geom_richtext(data=data_begin_end,aes(x=x,y=y,label = label),fontface = "bold",inherit.aes = F,size=5,fill = NA, label.color = NA,) +
+  coord_cartesian(clip = 'off') +
+  ggtext::geom_richtext(aes(label = Tools),vjust=-1,color=my_color,size=5,alpha=1) +
+  
+  theme(
+        legend.position = "none",
+        panel.grid = element_blank(),
+        plot.title = element_text(hjust = .5, color = "white"),
+        plot.caption = element_text(hjust = 1, color = "white", size = 8),
+        plot.subtitle = element_text(hjust = .5, color = "white", size = 10),
+        axis.line = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title = element_blank(),
+        axis.text.x = ggtext::element_markdown(face = 2, color = "black",size = 14),
+        panel.background = element_rect(fill = "white"),
+        plot.background = element_rect(fill = "white")) +
+  scale_x_continuous(breaks = data_progression$order %>% unique() %>% sort(),
+                     labels = data_progression %>% distinct(order, Parts) %>% arrange(order) %>% pull(Parts))
+
+p4.training <- filter(data_progression,order<=4) %>% ggplot(aes(order,rank,label = order)) +
+  geom_bump(data= data_progression,smooth = 15, size = 2,col=my_color,alpha=0.4) +
+  geom_bump(smooth = 15, size = 2,col=my_color,alpha=1) +
+  geom_point(col=my_color,alpha=1,size=10) +
+  geom_text(col="white", fontface = "bold",size=6,alpha=1) +
+  ggtext::geom_richtext(data=data_begin_end,aes(x=x,y=y,label = label),fontface = "bold",inherit.aes = F,size=5,fill = NA, label.color = NA,) +
+  coord_cartesian(clip = 'off') +
+  ggtext::geom_richtext(aes(label = Tools),vjust=-1,color=my_color,size=5,alpha=1) +
+  
+  theme(
+        legend.position = "none",
+        panel.grid = element_blank(),
+        plot.title = element_text(hjust = .5, color = "white"),
+        plot.caption = element_text(hjust = 1, color = "white", size = 8),
+        plot.subtitle = element_text(hjust = .5, color = "white", size = 10),
+        axis.line = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title = element_blank(),
+        axis.text.x = ggtext::element_markdown(face = 2, color = "black",size = 14),
+        panel.background = element_rect(fill = "white"),
+        plot.background = element_rect(fill = "white")) +
+  scale_x_continuous(breaks = data_progression$order %>% unique() %>% sort(),
+                     labels = data_progression %>% distinct(order, Parts) %>% arrange(order) %>% pull(Parts))
+print(p0.training)
+```
+
+-   Slides : https://rochevin.github.io/formation_ggplot2
+-   Download slides and data: https://github.com/rochevin/formation_ggplot2/archive/refs/heads/main.zip
+-   Compagnon wiki: https://github.com/rochevin/formation_ggplot2/wiki
+
+## Why `ggplot2` instead of base plot ?
+
+-   Provide helpful commands to create complex, "almost" publication ready plots.
+-   Minimal changes from the data are needed to change from a barplot to a scatterplot.
+-   Include summary statistics (mean / median / linear regression).
+-   Plots are heavily customizable (even if the plot is generated by someone else).
+-   Heavily documented and used.
+-   [A lot of extensions](https://github.com/erikgahner/awesome-ggplot2).
+
+```{r out.width = "100%", fig.align = "center",echo=F}
+knitr::include_graphics("imgs/ggplot2_gallery.svg")
+```
+
+<sub>[Thomas Mock (2022). Tidy Tuesday: A weekly data project aimed at the R ecosystem.](https://github.com/rfordatascience/tidytuesday)</sub>
+
+## Why `ggplot2` instead of base plot ?
+
+```{r out.width = '90%',echo=F, fig.align = "center"}
+knitr::include_graphics("imgs/pfsave.svg")
+```
+
+------------------------------------------------------------------------
+
+## R packages for data science {background-image="imgs/Tidyverse.png" background-size="60%" background-position="0% 50%"}
+
+::: columns
+::: {.column width="50%"}
+:::
+
+::: {.column width="50%"}
+The tidyverse is an opinionated collection of R packages designed for data science. All packages share an underlying design philosophy, grammar, and data structures.
+
+Install the complete tidyverse with:
+
+``` r
+install.packages("tidyverse")
+```
+
+Look at the cheatsheets: https://www.rstudio.com/resources/cheatsheets/
+:::
+:::
+
+## Tidyverse
+
+### Load packages
+
+```{r eval=F}
+require(tidyverse)
+```
+
+```         
+── Attaching packages ─────────────────────────────────────────── tidyverse 1.3.1 ──
+✔ ggplot2 3.3.6     ✔ purrr   0.3.4
+✔ tibble  3.1.7     ✔ dplyr   1.0.9
+✔ tidyr   1.2.0     ✔ stringr 1.4.0
+✔ readr   2.1.2     ✔ forcats 0.5.1
+── Conflicts ────────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+```
+
+### Content
+
+```{r,echo=F}
+data_progression %>% dplyr::select(Parts,Tools) %>%
+  mutate_all(function(x){str_replace(x,"<br>"," ")}) %>% 
+  kable(format="markdown") 
+```
+
+## Tidy data
+
+> **Tidying:** structuring datasets to facilitate analysis.
+
+A tidy dataset :
+
+```{r out.width = "100%", fig.align = "center",echo=F}
+knitr::include_graphics("imgs/tidy-1.png")
+```
+
+## Why tidying a dataset ?
+
+```{r define, echo=F, message=FALSE, warning=FALSE}
+treatments <- 
+    data.frame(
+        treatment_a = sample(10:25,size = 3,replace = T),
+        treatment_b = sample(10:25,size = 3,replace = T),
+        treatment_c = sample(10:25,size = 3,replace = T)
+    )
+rownames(treatments) <- c("John Smith","Jane Doe","Mary Johnson")
+```
+
+```{r show1,results='asis',echo=F}
+treatments %>% kable(caption = "Typical presentation dataset") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+```{r boxplot1, echo=T, fig.height=3.5, fig.width=8,fig.align='center'}
+boxplot(treatments)
+```
+
+## Why tidying a dataset ?
+
+```{r,echo=T}
+treatments.2 <- t(treatments)
+```
+
+```{r, echo=F,results='asis'}
+kable(treatments.2,caption = "The same data but structured differently") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+```{r boxplot2, echo=T, fig.height=3.5, fig.width=8,fig.align='center'}
+
+boxplot(treatments.2)
+```
+
+## Why tidying a dataset ?
+
+```{r}
+treatments.3 <- tibble::rownames_to_column(treatments,var = "person")
+treatments.3 <- tidyr::pivot_longer(treatments.3,-person,names_to = "treatment",values_to = "result")
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE,results='asis'}
+treatments.3 %>% mutate(treatment = cell_spec(treatment, align = "c",background =factor(treatment,unique(treatments.3$treatment),RColorBrewer::brewer.pal(length(unique(treatments.3$treatment)), "Spectral")))) %>% mutate(person = cell_spec(person, align = "c",background =factor(person,unique(treatments.3$person),RColorBrewer::brewer.pal(length(unique(treatments.3$treatment)), "Set1")))) %>% 
+    mutate(result = cell_spec(result, align = "c",background ="black",color = "white")) %>% kable(caption = "An exemple of a tidy dataset",escape=F) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+## Why tidying a dataset ?
+
+```{r boxplot3, echo=TRUE, fig.height=5, fig.width=8, message=FALSE, warning=FALSE,fig.align='center'}
+boxplot(result~treatment,data=treatments.3)
+```
+
+## Why tidying a dataset ?
+
+```{r boxplot4, echo=TRUE, fig.height=5, fig.width=8, message=FALSE, warning=FALSE,fig.align='center'}
+boxplot(result~person,data=treatments.3)
+```
+
+## Why tidying a dataset ?
+
+```{r boxplot5, echo=TRUE, fig.height=5, fig.width=8, message=FALSE, warning=FALSE,fig.align='center'}
+boxplot(result~person+treatment,data=treatments.3)
+```
+
+## Read a dataset
+
+```{r,echo=F,warning=F,message=F,fig.align='center',fig.height=6,fig.width=14}
+p1.training
+```
+
+## Read a dataset with base `R`
+
+```{r}
+read.table(file = "iris.tsv",sep="\t",header = T)
+```
+
+## Read a dataset with base `R`
+
+-   Return a `data.frame` object.
+-   `read.csv`, `read.csv2`, `read.delim` can also be used.
+-   Cannot read `.xsl` files (we have to use another package).
+
+## Read a dataset with `readr`
+
+```{r}
+read_tsv(file = "iris.tsv")
+```
+
+## Read a dataset with `readr`
+
+-   Return a `tibble` object.
+-   `read_csv`, `read_csv2`, `read_table` can also be used.
+-   `.xsl` files are managed by `readxl`, an other tidyverse package (not loaded by default).
+
+## Tibbles: `tibble::tibble()`
+
+**Pros:**
+
+-   Cells can contain list and data.frame.
+-   It never changes an input's type (i.e., no more `stringsAsFactors = FALSE`!).
+-   Can use not valid R variable names (`:)`) as column names.
+-   Refined print method that shows only the first 10 rows.
+
+**Cons:**
+
+-   It never uses `row.names()`.
+    -   use `tibble::rownames_to_column()`.
+
+## Data manipulation with `dplyr` and `tidyr`
+
+```{r,echo=F,warning=F,message=F,fig.align='center',fig.height=6,fig.width=14}
+p2.training
+```
+
+## Data manipulation with `dplyr` and `tidyr`
+
+#### dplyr is a grammar of data manipulation, providing a consistent set of verbs that help you solve the most common data manipulation challenges:
+
+-   `mutate()` adds new variables that are functions of existing variables
+-   `select()` picks variables based on their names.
+-   `filter()` picks cases based on their values.
+-   `summarise()` reduces multiple values down to a single summary.
+-   `arrange()` changes the ordering of the rows.
+-   `group_by()` perform any operation "by group".
+
+#### Some examples :
+
+::: columns
+::: {.column width="50%"}
+```{r}
+summarise(iris,mean(Petal.Width))
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+summarise(group_by(iris,Species),mean(Petal.Width))
+```
+:::
+:::
+
+## Pipes
+
+**The pipe %\>%:**
+
+-   Come from the \textbf{magrittr} package by Stefan Milton Bache.
+-   Automatically loaded in tidyverse.
+-   Equivalent to `|` in `bash`
+
+```{bash echo=TRUE}
+cat iris.tsv | cut -f5 | sed 's/^./\U&/' | head
+```
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+read_tsv("iris.tsv",col_names = F) %>% pull(5) %>% str_to_title() %>% head
+```
+
+## Pipes vs no pipes : without pipe
+
+```{r,echo=FALSE}
+set.seed(123)
+```
+
+```{r histo1,echo=T, fig.height=3, fig.width=8,fig.align='center'}
+ex.dat <- rnorm(n = 1000,mean = 5,sd=1)
+sub.dat <- sample(ex.dat,size = 100,replace=F)
+hist(sub.dat)
+```
+
+## Pipes vs no pipes : without pipe
+
+```{r,echo=FALSE}
+set.seed(123)
+```
+
+```{r histo2,echo=T, fig.height=3, fig.width=8,fig.align='center'}
+hist(sample(rnorm(n = 1000,mean = 5,sd=1),size = 100,replace=F))
+```
+
+## Pipes vs no pipes : with pipe
+
+```{r,echo=FALSE}
+set.seed(123)
+```
+
+```{r histo3,echo=T, fig.height=3, fig.width=8,fig.align='center'}
+rnorm(n = 1000,mean = 5,sd=1) %>%
+    sample(size = 100,replace=F) %>%
+    hist()
+```
+
+## Prepare `penguins` dataset for `ggplot2` {background-image="https://allisonhorst.github.io/palmerpenguins/logo.png" background-size="10%" background-position="100% 0%"}
+
+### `palmerpenguins` dataset
+
+::: callout-note
+The `palmerpenguins` R package contains contains size measurements for three penguin species observed on three islands in the Palmer Archipelago, Antarctica.
+:::
+
+![](https://allisonhorst.github.io/palmerpenguins/reference/figures/lter_penguins.png){fig-align="center"}
+
+```{r,echo=F}
+require(palmerpenguins)
+penguins
+```
+
+
+
+## Premier graphique
+
+### Au début, il existe mais il ne montre rien...
+
+```{r}
+library(ggplot2)
+library(palmerpenguins) # des MANCHOTS, pas des pingouins !
+MonPremierGraphique <- ggplot(data=penguins)
+MonPremierGraphique
+```
+
+## Je ne vois rien ! Pourtant l'objet `MonPremierGraphique` existe et il contient plein de choses.
+
+::: {.panel-tabset}
+
+### `summary(MonPremierGraphique)`
+
+```{r}
+summary(MonPremierGraphique)
+```
+
+### `typeof(MonPremierGraphique)`
+
+```{r}
+typeof(MonPremierGraphique)
+```
+
+### `names(MonPremierGraphique)`
+
+```{r}
+names(MonPremierGraphique)
+```
+
+### `class(MonPremierGraphique)`
+
+```{r}
+class(MonPremierGraphique)
+```
+
+### `head(MonPremierGraphique$data)`
+
+```{r}
+head(MonPremierGraphique$data)
+```
+
+### `MonPremierGraphique$layers`
+
+```{r}
+MonPremierGraphique$layers
+```
+
+:::
+
+
+::: {.fragment}
+> HW a dit : *The plot is not ready to be displayed until one layer is added.*
+
+OK, donc c'est normal si je ne vois rien, car le composant `layers` de l'objet `MonPremierGraphique` ne contient rien.
+
+:::
+
+## ... alors j'essaie d'y mettre des choses...
+
+```{r}
+MonPremierGraphique <- ggplot(data = penguins,
+                              aes(x = bill_length_mm,
+                                  y = bill_depth_mm))
+MonPremierGraphique
+```
+
+C'est mieux, je vois des axes avec les variables que je veux représenter en x et y, mais rien de plus.
+
+> HW a dit : *A minimal layer may do nothing more than specify a `geom`, a way of visually representing the data.*
+
+## ... et finalement, je vois !
+
+Alors, je vais ajouter un `layer`. Pour cela, plein de fonctions existent pour dire quels objets géométriques je veux utiliser pour la représentation. Soyons modestes, commençons par des points avec la fonction `geom_point()`. 
+
+```{r}
+MonPremierGraphique + geom_point()
+```
+
+**Youpi, trompettes et confettis !** Voilà, mon premier graphique réalisé avec `ggplot2`.
+
+## ... et finalement, je vois !
+
+Sauvons-le et auscultons-le.
+```{r}
+MonPremierGraphiqueLeVrai <- MonPremierGraphique + geom_point()
+```
+
+
+```{r}
+summary(MonPremierGraphiqueLeVrai)
+MonPremierGraphiqueLeVrai$layers
+```
+
+
+Il a bien un `layer` et c'est pourquoi je peux voir quelque chose.
+
+## Pour mieux (?) comprendre ce qui se passe
+
+Reprenons l'objet `MonPremierGraphique`
+
+```{r}
+MonPremierGraphique
+```
+
+
+## Pour mieux (?) comprendre ce qui se passe
+
+On sait qu'il n'affiche rien car il n'a pas de `layer`. On a ajouté un `layer` avec la fonction `geom_point()`.
+
+
+```{r}
+MonPremierGraphique + geom_point()
+```
+
+## Pour mieux (?) comprendre ce qui se passe
+
+Mais on aurait aussi bien pu le faire avec la fonction `layer()`, fonction dans laquelle on spécifie tous les attributs d'un `layer` : `mapping`, `data` (ici c'est inutile car on les a déjà spécifiés dans l'objet `MonPremierGraphique`, `geom`, `stat` et `position`.
+
+```{r}
+MonPremierGraphique +
+  layer(
+    mapping = NULL,
+    data = NULL,
+    geom = "point",
+    stat = "identity",
+    position = "identity"
+)
+```
+
+En fait, la fonction `geom_point()` nous simplifie la vie en appelant elle-même la fonction `layer()` avec les paramètres qu'il faut.
+
+## Pour mieux (?) comprendre ce qui se passe
+
+A noter qu'il existe une façon de faire la même chose en cachant encore plus les choses : la fonction `qplot()`.
+
+```{r}
+qplot(bill_length_mm, bill_depth_mm, data = penguins)
+```
+
+Mais, dans la préface à la 2eme édition de *`ggplot:` Elegant Graphics for Data Analysis* 
+
+> HW a dit : *Switched from `qplot()` to `ggplot()` in the introduction, Chapter 2. Feedback indicated that `qplot()` was a crutch: it makes simple plots a little easier, but it doesn't help with mastering the grammar.*
+
+Et effectivement, en utilisant `qplot()`, on garde à peu près nos habitudes liées à `plot()` mais la *layered grammar* est complètement cachée.
+
+## Bilan
+
+Pour faire un graphique :
+
+- les données sont stockées dans un `data.frame` et pas autrement, ce n'est pas négociable !
+
+- les `aesthetics mappings` lient des variables du jeu de données à des propriétés visuelles (utiliser la fonction `aes()`).
+
+- seul l'ajout d'un `layer` permet de visualiser quelque chose (utiliser les fonctions `geom_*()`).
+
+- Ce qui donne une syntaxe comme celle-ci : 
+`ggplot(data = penguins, aes(x = bill_length_mm, y = bill_depth_mm)) + geom_point()`
+
+On est bon ? Oui ? alors, on continue...
+
+## Améliorons un peu ce premier graphique
+
+### Un peu de couleur
+
+J'aimerais bien que les points soient colorés en fonction de la variable `species` du jeu de données `penguins`.
+
+Il suffit pour cela de préciser un lien entre cette variable du jeu de données et la propriété visuelle `colour` au moyen de la fonction `aes()`.
+
+```{r }
+MonPremierGraphiqueLeVraiEnCouleur <-
+  MonPremierGraphiqueLeVrai + aes(colour = species)
+MonPremierGraphiqueLeVraiEnCouleur
+```
+
+## En changeant la forme
+
+En fait, les couleurs c'est bien, mais si mes lecteurs les distinguent mal, je préfère changer la forme (`shape`) plutôt que la couleur.
+
+```{r }
+MonPremierGraphiqueLeVraiEnFormes <-
+  MonPremierGraphiqueLeVrai + aes(shape = species)
+MonPremierGraphiqueLeVraiEnFormes
+```
+
+Mouais, pas très lisible. Et si je combinais les deux...
+
+## Un peu de couleur... en changeant la forme
+
+On peut utiliser la même variable pour donner à la fois la couleur et la forme. Dans ce cas, une seule légende est affichée.
+
+```{r }
+MonPremierGraphiqueLeVraiEnCouleurEtFormes <- ggplot(data = penguins,
+                            aes(x = bill_length_mm, y = bill_depth_mm,
+                                colour = species, shape = species)) +
+                            geom_point()
+MonPremierGraphiqueLeVraiEnCouleurEtFormes
+```
+
+Les noms des graphiques deviennnent un peu long, je vais me calmer un peu et reprendre depuis le début pour voir si j'ai compris. Je vais pousser un peu le zèle jusqu'à utiliser 2 variables qualitatives (1 pour la couleur, l'autre pour la forme), mais je suis confiant.
+
+## Un peu de couleur... en changeant la forme
+
+```{r }
+PointCouleurForme <- ggplot(data = penguins,
+                            aes(x = bill_length_mm, y = flipper_length_mm,
+                                colour = species,
+                                shape = island)) + geom_point()
+PointCouleurForme
+```
+
+Et bien voilà ! C'est pas mal tout ça.
+
+## Un peu de couleur... en changeant la forme
+
+Juste pour voir, si j'inverse les 2 variables qualitatives.
+
+```{r }
+PointCouleurForme <- ggplot(data = penguins,
+                            aes(x = bill_length_mm, y = flipper_length_mm,
+                                colour = island,
+                                shape = species)) + geom_point()
+PointCouleurForme
+```
+
+L'impression est différente. A méditer...
+
+## Et si je m'amusais avec les autres variables
+
+:::: {.columns}
+
+::: column
+
+```{r fig.height=4}
+ggplot(data = penguins ,aes(x = flipper_length_mm, y = bill_length_mm,
+                                colour = bill_depth_mm,
+                                size = body_mass_g)) + geom_point()
+```
+
+:::
+
+::: column
+
+::: {.fragment}
+
+Ouh là, là... c'est joli (ou pas), mais qu'ai-je donc fait ? Reprenons calmement :
+
+- je suis toujours dans un nuage de points (`geom_point()`) avec `flipper_length_mm` en abscisses (`aes(x= )`) et `bill_length_mm` en ordonnées (`aes(y= )`).
+- dans la fonction `aes()`, j'ai lié la couleur à la variable `bill_depth_mm` obtenant ainsi une dégradé de bleu (plus la valeur de `bill_depth_mm` est élevée, plus le symbole est clair).
+- toujours dans la fonction `aes()`, j'ai lié la taille à la variable `body_mass_g` obtenant ainsi des points d'autant plus grands que la valeur de `body_mass_g` est élevée.
+- pour le même prix, j'ai obtenu les deux légendes associées.
+- tous ces éléments illustrent la notion de `scaling` qui contrôle le lien entre les données et un attribut `aesthetic`. Tout attribut `aesthetic` a besoin d'une échelle. Parfois (souvent), on ne s'en rend pas compte parce qu'une valeur par défaut est prévue.
+
+:::
+
+:::
+
+::::
+
+## En vue éclatée
+
+Ok, je peux m'amuser à personnaliser mon graphique avec des couleurs, des formes, des tailles différentes. Et si je restais sobre en présentant un graphique par modalité de la variable `species`.
+
+Très facile (comme le reste !), il suffit d'utiliser le `facetting`.
+
+Repartons de `MonPremierGraphiqueLeVrai` et utilisons, simplement, la fonction `facet_wrap()`.
+
+```{r}
+#| fig-align: center
+
+
+MonPremierGraphiqueLeVrai + facet_wrap(~species)
+```
+
+## En vue éclatée
+
+Il va de soi que l'on peut combiner tout ça.
+
+```{r }
+MonPremierGraphiqueLeVrai +
+  aes(colour = bill_depth_mm) +
+  facet_wrap(~species)
+```
+
+## En vue éclatée
+
+Avec un deuxième facteur, on peut réaliser (très facilement, on s'en doute) toute une planche de graphiques, cette fois-ci avec `facet_grid()`.
+
+:::{.panel-tabset}
+
+### `species ~ island`
+
+```{r fig.width = 5}
+MonPremierGraphiqueLeVrai + facet_grid(species ~ island)
+```
+
+### `island ~ species`
+
+```{r fig.width = 5}
+MonPremierGraphiqueLeVrai + facet_grid()
+```
+
+### `species ~ sex`
+
+```{r fig.width = 5}
+MonPremierGraphiqueLeVrai + facet_grid(species ~ sex)
+```
+
+:::
+
+
+
+## Histogramme
+
+### C'est bien mais il n'y a pas que les nuages de points dans la vie
+
+
+
+Pour réaliser un histogramme, il suffit... de le demander. On utilise toujours le data.frame `penguins` avec cette fois-ci seulement une variable (ici `flipper_length_mm` en `x`).
+
+```{r}
+Histogramme <- ggplot(penguins, aes(x = flipper_length_mm)) +
+  geom_histogram()
+Histogramme
+```
+
+OK, pas génial, mais on a bien un histogramme. Histogramme sur lequel, on peut appliquer les recettes précédentes.
+
+## Histogramme
+
+- Le `facetting` pour avoir un histogramme par modalité du facteur `species`
+
+```{r }
+Histogramme + facet_wrap(~species)
+```
+
+## Histogramme
+
+
+- et aussi des couleurs (même si l'interprétation n'en est pas forcément améliorée)
+
+```{r }
+Histogramme + aes(colour = species)
+Histogramme + aes(fill = species)
+```
+
+## Histogramme
+
+Au fait, vous avez vu qu'il nous embête avec un warning qui parle de `stat_bin()`.
+
+> HW a dit : *The choice of bins is very important for histograms [...]. In `ggplot2`, a very simple heuristic is used for the default number of bins: it uses 30, regardless of the data. This is perverse, and ignores all of the research on selecting good bin sizes automatically, but sends a clear message to the user that they need to think about and experiment with the bin width.* 
+
+Et bim !
+
+Alors, on va essayer de penser un peu et diminuer la largeur des intervalles (`binwidth`).
+
+```{r }
+ggplot(penguins, aes(x = bill_length_mm)) +
+  geom_histogram(binwidth = 0.5)
+```
+
+## Histogramme
+
+OK, ça a l'air d'aller mieux. Et, juste manière, avec des couleurs.
+
+```{r }
+ggplot(penguins, aes(x = bill_length_mm, fill = species)) +
+  geom_histogram(binwidth = 0.5)
+```
+
+## Histogramme
+
+Au fait, juste pour voir si on a compris le principe, comparons
+
+:::: {.columns}
+
+::: {.column}
+```{r}
+ggplot(penguins, aes(x = bill_length_mm)) + geom_histogram()
+```
+::: 
+
+::: {.column}
+```{r}
+ggplot(penguins, aes(x = bill_length_mm)) + geom_bar(stat = "bin")
+```
+::: 
+
+::::
+
+
+C'est la même chose ! Logique non ? Un histogramme n'est rien d'autre qu'un diagramme en bâtons prenant comme données le nombre de valeurs dans chaque  *bin*.
+
+## Histogramme
+
+On peut ainsi s'amuser avec d'autres représentations graphiques de ces *counts*.
+
+
+
+:::: {.columns}
+
+::: {.column}
+```{r}
+ggplot(penguins, aes(x = bill_length_mm)) + geom_point(stat = "bin")
+```
+::: 
+
+::: {.column}
+```{r}
+ggplot(penguins, aes(x = bill_length_mm)) + geom_line(stat = "bin")
+```
+::: 
+
+::::
+
+## Diagramme en bâtons 
+
+Puisque que je viens de voir passer `geom_bar`, je vais m'attarder un peu dessus pour représenter 2 variables qualitatives.
+
+```{r}
+table(penguins$island, penguins$species)
+```
+
+::: .fragment
+
+```{r}
+ggplot(penguins, aes(x=species, fill=island)) + geom_bar()
+```
+
+:::
+
+## Diagramme en bâtons 
+
+Puisque que je viens de voir passer `geom_bar`, je vais m'attarder un peu dessus pour représenter 2 variables qualitatives.
+
+```{r}
+table(penguins$island, penguins$species)
+```
+
+
+```{r}
+ggplot(penguins, aes(x=species, fill=island)) + geom_bar(position = "dodge")
+```
+
+
+## Diagramme en bâtons 
+
+Puisque que je viens de voir passer `geom_bar`, je vais m'attarder un peu dessus pour représenter 2 variables qualitatives.
+
+```{r}
+table(penguins$island, penguins$species)
+```
+
+
+```{r}
+ggplot(penguins, aes(x=species, fill=island)) + geom_bar(position = "fill")
+```
+
+## Diagramme en bâtons 
+
+Puisque que je viens de voir passer `geom_bar`, je vais m'attarder un peu dessus pour représenter 2 variables qualitatives.
+
+```{r}
+table(penguins$island, penguins$species)
+```
+
+
+```{r}
+ggplot(penguins, aes(x=species, fill=sex)) + geom_bar(position = "dodge")
+```
+
+## Densité
+
+Je poursuis autour de la distribution des données avec la représentation de densité grâce à la fonction... devinez... `geom_density()`.
+
+Pour démarrer, c'est facile, maintenant on gère ça tranquillement.
+```{r}
+ggplot(penguins, aes(x = bill_length_mm)) + geom_density()
+```
+
+## Densité
+
+Je vais le faire aussi en couleur par modalité de `species`, maintenant que je suis à l'aise.
+
+```{r }
+ggplot(penguins, aes(x = bill_length_mm, colour = species)) +
+  geom_density()
+```
+
+## Densité
+
+Pour avoir des lignes dans la légende on doit passer par `stat_density()` : 
+
+```{r}
+ggplot(penguins, aes(x = bill_length_mm, colour = species)) +
+ stat_density(geom="line", position = "identity")
+```
+
+## Densité
+
+Au fait, on a vu `fill` tout à l'heure, regardons ce que ça donne ici
+
+```{r }
+ggplot(penguins, aes(x = bill_length_mm, fill = species)) +
+  geom_density()
+```
+
+Superbe ! Euh oui, sauf que je m'attendais à mieux en fait, mais je ne sais pas trop quoi ? Que les courbes ne se cachent les unes derrière les autres par exemple ? Oui c'est exactement ça ! Et alors, on fait comment ? On ajoute de la transparence avec le paramètre `alpha`.
+
+## Densité
+
+```{r }
+ggplot(penguins, aes(x = bill_length_mm, fill = species)) +
+  geom_density(alpha = 0.4)
+```
+
+Ah ouais, là chapeau. Je prends.
+
+## Boxplot
+
+Poursuivons avec des boxplots. D'abord un seul
+
+```{r}
+MonGraphe <- ggplot(penguins)
+MonGraphe + geom_boxplot(aes(y = bill_length_mm))
+```
+
+## Boxplot
+
+Puis par modalité de `species` encore une fois. Pour cela, il suffit de préciser que l'axe des x du graphique est lié à la variable `species` (oui, elle est qualitative, et alors ?).
+
+```{r}
+MonGraphe + geom_boxplot(aes(x = species, y = bill_length_mm))
+```
+
+## Boxplot
+
+Et si je prefère des boxplots à l'horizontale, il suffit d'échanger les coordonnées
+
+```{r}
+MonGraphe + geom_boxplot(aes(y = species, x = bill_length_mm))
+```
+
+## Boxplot
+
+ou d'utiliser la fonction `coord_flip()`.
+
+```{r}
+MonGraphe + geom_boxplot(aes(x = species, y = bill_length_mm)) +
+  coord_flip()
+```
+
+## Boxplot
+
+Ce qui est bien avec les boxplots c'est quand on peut aussi voir les points. Simple, il suffit d'ajouter un `layer` au graphique des boxplots.
+
+```{r}
+MonGraphe +
+  geom_boxplot(aes(x = species, y = bill_length_mm)) +
+  geom_point(aes(x = species, y = bill_length_mm))
+```
+
+Euh oui d'accord, mais c'est pas terrible, on peut pas faire mieux ? Je reformule : comment peut-on faire mieux ?
+
+## Boxplot
+
+En évitant la superposition des points par exemple et en jouant aussi sur la tranparence.
+
+```{r}
+MonGraphe +
+  geom_boxplot(aes(x = species, y = bill_length_mm)) +
+  geom_point(aes(x = species, y = bill_length_mm),
+             alpha = 0.2, position = "jitter")
+```
+
+## Boxplot
+
+J'ai écrit deux fois la même chose dans ma commande (`aes(x = species, y = bill_length_mm)`), ne pouvais-je pas m'en passer ? Si bien sûr, comme pour les calculs, on factorise. Reprenons depuis le début.
+
+```{r}
+ggplot(penguins, aes(x = species, y = bill_length_mm)) +
+  geom_boxplot() +
+  geom_point(alpha = 0.2, position = "jitter")
+```
+
+Le fait d'utiliser `species` en x et `bill_length_mm` en y étant commun aux deux graphiques que je veux réaliser, je positionne ces informations à un niveau supérieur.
+
+## Boxplot
+
+Mais je ne suis pas obligé de tout remonter, il peut y avoir des `aesthetics` propres à un `layer` comme ici où on utilise la variable `bill_depth_mm` pour la taille des points (et cela n'a rien à voir avec les boxplots).
+
+```{r}
+ggplot(penguins, aes(x = species, y = bill_length_mm)) +
+  geom_boxplot() +
+  geom_point(aes(size = bill_depth_mm),
+             alpha = 0.2, position = "jitter")
+```
+
+## Boxplot
+
+Sinon, il y aussi la fonction `geom_jitter()` qui fait le boulot aussi bien (mieux ?) et on peut même resserrer un peu les points.
+
+```{r}
+ggplot(penguins, aes(x = species, y = bill_length_mm)) +
+  geom_boxplot() +
+  geom_jitter(alpha = 0.2, width = 0.1)
+```
+
+<!-- Alternatives au boxplot: -->
+
+<!-- ```{r} -->
+<!-- ggplot(penguins, aes(x = species, y = bill_length_mm)) + -->
+<!--    geom_point(alpha = 0.2, position = "jitter") +  -->
+<!--    stat_summary(fun = "median", geom = "point") -->
+
+<!-- if (require("Hmisc")) { -->
+<!--   ggplot(penguins, aes(x = species, y = bill_length_mm, shape = species)) +   -->
+<!--     geom_jitter(width = 0.2) + -->
+<!--     stat_summary(fun.data = mean_cl_normal, geom = "crossbar", -->
+<!--                  width = .5, color = "red") -->
+<!-- } -->
+<!-- ``` -->
+
+## Jouons du violon
+
+Et si je remplaçais les boîtes par des violons ! Il suffit de remplacer `geom_boxplot` par... `geom_violin`.
+
+```{r }
+ggplot(penguins, aes(x = species, y = bill_length_mm)) +
+  geom_violin() +
+  geom_point(aes(size = bill_length_mm),
+             alpha = 0.2, position = "jitter")
+```
+
+
+## Jouons du violon
+
+Pour les mêmes en couleur, avec un peu de transparence sur les violons :
+
+```{r }
+ggplot(penguins, aes(x = species, y = bill_length_mm)) +
+  geom_violin(aes(fill = species), alpha = 0.2) +
+  geom_jitter(aes(size =  bill_length_mm, colour = species),
+             width = 0.2, alpha = 0.6)
+```
+
+
+C'est presque trop facile.
+
+## Les nuages de points : le retour
+
+Au cas où vous ne seriez pas encore convaincus par `ggplot2`, on va revenir un moment sur les nuages de points. Et là, normalement, c'est l'*effet waouh* garanti.
+
+On a vu quelque part qu'un `layer` a 5 parties : 1/ les données 2/ les `aesthetics`, 3/ les `geoms`, 4/ les transformations statistiques et 5/ les ajustements de position. Jusqu'à présent, on a vu un peu de tout ça, sauf des statistiques, non ? Alors, allons-y !
+
+```{r}
+MonNuage <- ggplot(penguins, aes(x = flipper_length_mm, y = bill_length_mm)) +
+  geom_point()
+MonNuage
+```
+
+## Les nuages de points : le retour
+
+OK, jusqu'ici, on connaît, pas de quoi s'enflammer. Attention, le spectacle va commencer.
+
+```{r}
+MonNuage + geom_smooth()
+```
+
+Euh oui d'accord, c'est bien mais il sort d'où ce truc ? Et bien, il nous l'a dit `geom_smooth() using method = 'loess' and formula 'y ~ x'`.
+
+## Les nuages de points : le retour
+
+Un peu trop lisse ?
+```{r}
+MonNuage + geom_smooth(span = 0.2)
+```
+
+## Les nuages de points : le retour
+
+Pas assez ?
+
+```{r}
+MonNuage + geom_smooth(span = 1.2)
+```
+
+## Les nuages de points : le retour
+
+OK, si vous préférez une régression linéaire plutôt qu'un loess, il suffit de demander.
+
+```{r}
+MonNuage + geom_smooth(method = "lm")
+```
+
+Et d'autres, voir `?geom_smooth`.
+
+## Les nuages de points : le retour
+
+Déclinons là-dessus ce que l'on sait faire.
+
+- En facettes :
+
+```{r eval=FALSE}
+MonNuage + geom_smooth() + facet_wrap(~species)
+MonNuage + geom_smooth() + facet_grid(species~island)
+MonNuage + geom_smooth() + facet_wrap(species~island)
+```
+
+```{r ,echo=F,message=F,warning=F,fig.align='center',fig.width=14}
+p1.MonNuage <- MonNuage + geom_smooth() + facet_wrap(~species)
+p2.MonNuage <- MonNuage + geom_smooth() + facet_grid(species~island)
+p3.MonNuage <- MonNuage + geom_smooth() + facet_wrap(species~island)
+require(patchwork)
+p1.MonNuage | p2.MonNuage | p3.MonNuage
+
+```
+
+## Les nuages de points : le retour
+
+On note que l'échelle en x et en y est la même pour tous les sous-graphiques. On peut "libérer" l'une et/ou l'autre de ces échelles
+
+```{r eval=FALSE}
+MonNuage + geom_smooth() + facet_wrap(~species, scale = "free")
+MonNuage + geom_smooth() + facet_wrap(~species, scale = "free_x")
+MonNuage + geom_smooth() + facet_wrap(~species, scale = "free_y")
+```
+
+
+```{r echo=F,message=F,warning=F,fig.align='center',fig.width=14}
+p1.MonNuage <- MonNuage + geom_smooth() + facet_wrap(~species, scale = "free")
+p2.MonNuage <- MonNuage + geom_smooth() + facet_wrap(~species, scale = "free_x")
+p3.MonNuage <- MonNuage + geom_smooth() + facet_wrap(~species, scale = "free_y")
+require(patchwork)
+p1.MonNuage | p2.MonNuage | p3.MonNuage
+
+```
+
+## Les nuages de points : le retour
+
+- En couleurs
+
+```{r}
+MonNuage + aes(colour = species) + geom_smooth()
+```
+
+## Les nuages de points : le retour
+
+Ca commence à être sympa non ? Et noter l'aspect synthétique et concis du code.
+
+Remarque: On peut faire de l'extrapolation (seulement avec la méthode `lm`):
+
+```{r}
+MonNuage + aes(colour = species) + geom_smooth(method = "lm")
+```
+
+## Les nuages de points : le retour
+
+Ca commence à être sympa non ? Et noter l'aspect synthétique et concis du code.
+
+Remarque: On peut faire de l'extrapolation (seulement avec la méthode `lm`):
+
+```{r}
+MonNuage + aes(colour = species) + geom_smooth(method = "lm", fullrange = TRUE)
+```
+
+
+## Un petit truc pour parler des systèmes de coordonnées ou comment réaliser un camembert ?
+
+On peut apprécier ou pas les diagrammes circulaires ou camembert ou *pie chart*, mais ce serait bien de savoir en faire avec `ggplot2`. Cherchez bien dans l'aide, vous ne trouverez pas de fonction `geom_pie()`.
+
+Alors que R de base le fait très simplement.
+
+```{r}
+pie(table(penguins$species))
+```
+
+Et là, on ne serait pas un peu déçu de ne pas avoir de légende automatiquement ? C'est qu'on y prend goût à `ggplot2`.
+
+## Un petit truc pour parler des systèmes de coordonnées ou comment réaliser un camembert ?
+
+Au fait, si ces graphiques ne sont pas trop appréciés, c'est parce qu'on leur reproche le fait de devoir interpréter des angles ce que l'oeil humain ne parvient pas forcément très bien à faire. Et c'est pourquoi, on peut lui préférer un simple diagramme en bâtons, que R de base fait aussi très bien.
+
+```{r}
+barplot(table(penguins$species))
+```
+
+## Un petit truc pour parler des systèmes de coordonnées ou comment réaliser un camembert ?
+
+Ouais, c'est quand même un peu tristounet. Mais les diagrammes en bâtons, je sais faire avec `ggplot2`
+ 
+```{r}
+ggplot(penguins, aes(x = species)) + geom_bar()
+```
+
+Et là, révélation ! Un diagramme circulaire, c'est un diagramme en bâtons ! euh, non... Mais si, mais dans un repère de coordonnées polaires ! Ah, oui, euh, peut-être... [Sceptique].
+
+> HW a dit : *In the grammar, a pie chart is a stacked bar geom drawn in a polar coordinate system.*
+
+## Un petit truc pour parler des systèmes de coordonnées ou comment réaliser un camembert ?
+
+```{r}
+ggplot(penguins, aes(x = species)) + geom_bar() + coord_polar()
+```
+
+## Un petit truc pour parler des systèmes de coordonnées ou comment réaliser un camembert ?
+
+
+Ah oui ! Bizarre non ? OK, on arrange un peu tout ça.
+
+```{r}
+ggplot(penguins, aes(x = species, fill = species)) +
+  geom_bar(width = 1) +
+  coord_polar()
+```
+
+Tada !
+
+En fait, c'était juste pour parler de systèmes de coordonnées...
+
+
+## Et si je veux changer de style
+
+Choisis ton thème ! Voir `help(theme_bw)`.
+
+```{r eval=F}
+MonNuageTest <- MonNuage + aes(colour = species) + geom_smooth() 
+MonNuageTest + theme_bw()
+MonNuageTest + theme_dark()
+MonNuageTest + theme_light()
+MonNuageTest + theme_gray()
+```
+
+```{r echo=F,message=F,warning=F,fig.align='center',fig.width=14}
+
+MonNuageTest <- MonNuage + aes(colour = species) + geom_smooth() 
+p1 <- MonNuageTest + theme_bw()
+p2 <-MonNuageTest + theme_dark()
+p3 <-MonNuageTest + theme_light()
+p4 <-MonNuageTest + theme_gray()
+
+p1 + p2 + p3 + p4
+```
+
+
+## Jouons maintenant avec les échelles
+
+Pour jouer avec les échelles, il y a de la matière ! Il suffit de regarder le nombre de fonctions `scale_*()`. Et comme on l'a vu plus tôt, chaque `aesthetic` a une échelle.
+
+### On pense d'abord aux échelles des axes
+
+#### Les échelles linéaires
+
+Reprenons le graphique `MonNuage`. Et (re-)constatons qu'il suffit de saisir son nom pour qu'il apparaisse.
+
+```{r}
+MonNuage
+```
+
+## Jouons maintenant avec les échelles
+
+### On pense d'abord aux échelles des axes
+
+Allons bricoler l'axe des abscisses. En parcourant la liste des fonctions `scale_*()`, on peut deviner (non ?) que la fonction à manipuler est `scale_x_continuous()` et en consultant sa fiche d'aide, on peut aisément voir comment modifier le titre (`name`), le découpage (`breaks`), les limites (`limits`) et d'autres choses...
+
+```{r}
+MonNuage + scale_x_continuous(name = "Longueur de nageoire (mm)",
+                              breaks = seq(170, 230, by = 10),
+                              limits = c(170, 230))
+```
+
+Question : comment modifier l'axe des ordonnées ? Il serait quasiment insultant de fournir ici une réponse à cette question.
+
+## Jouons maintenant avec les échelles
+
+#### Les échelles log
+
+<!-- illustrer la différence entre changer l'échelle et transformer les données ? -->
+
+```{r}
+MonNuage + aes(x = flipper_length_mm^2, y = bill_length_mm^3) +
+  scale_x_log10() + scale_y_log10()
+```
+
+
+## Mais il y a aussi les légendes (?!)
+
+#### Pour des couleurs liées à une variable qualitative
+
+On va ajouter un `aesthetics` à notre graphique pour continuer à explorer les échelles.
+
+```{r }
+MonNuageCouleur <- MonNuage + aes(colour = species)
+MonNuageCouleur
+```
+
+Comme dit et re-dit précédemment, à chaque `aesthetics` est associée une échelle. On a ajouté l'aesthetics colour, donc il y a une échelle associée.
+
+
+## Mais il y a aussi les légendes (?!)
+
+Pour la modifier et utiliser par exemple des palettes (qualitatives dans le cas présent) de couleur du package `RcolorBrewer`
+
+```{r , fig.height=6}
+library("RColorBrewer")
+display.brewer.all()
+```
+
+utilisons la fonction `scale_colour_brewer()`
+
+```{r}
+p1 <- MonNuageCouleur + scale_colour_brewer(palette = "Set2")
+p2 <- MonNuageCouleur + scale_colour_brewer(palette = "Set3")
+```
+
+```{r}
+#| echo: false
+
+p1|p2
+```
+
+
+## Mais il y a aussi les légendes (?!)
+
+
+ou d'autres fonctions
+
+```{r}
+p1 <- MonNuageCouleur + scale_colour_grey()
+p2 <- MonNuageCouleur + scale_colour_hue(l = 50, c = 30)
+```
+
+```{r}
+#| echo: false
+
+p1|p2
+```
+
+
+## Mais il y a aussi les légendes (?!)
+
+Et pour mettre ses couleurs favorites, on peut même le faire à la main.
+
+```{r }
+MonNuageCouleur +
+  scale_colour_manual(values = c("rosybrown", "tomato", "midnightblue"))
+```
+
+En cas de manque d'inspiration, la fonction `colours()` est là.
+
+#### Pour des couleurs liées à une variable qualitative
+
+
+## Mais il y a aussi les légendes (?!)
+
+Et pour une légende en couleur liée à une variable quantitative, comment ça marche ? Pareil !
+
+Modifions l'aesthetic `colour`
+
+```{r}
+MonNuageCouleurQuanti <- MonNuage + aes(colour = bill_depth_mm)
+MonNuageCouleurQuanti
+```
+
+On a, comme on l'a déjà vu, une teinte de bleu qui s'éclaircit quand la valeur de `bill_depth_mm` augmente. Et si je veux changer du bleu ?
+
+## Mais il y a aussi les légendes (?!)
+
+On peut encore aller piocher dans les palettes (séquentielles cette fois-ci) du package `RColorBrewer`, mais, là dans `ggplot2`, on ne brasse plus, on distille.
+
+```{r}
+p1 <- MonNuageCouleurQuanti + scale_colour_distiller(palette = "Greens")
+p2 <- MonNuageCouleurQuanti + scale_colour_distiller(palette = "Purples")
+```
+
+```{r}
+#| echo: false
+
+p1|p2
+```
+
+
+## Mais il y a aussi les légendes (?!)
+
+Pas mal, mais je ne vois pas bien les points les plus clairs. Pas de problème, je vais passer en `theme_dark`.
+
+```{r}
+#| fig-align: center
+MonNuageCouleurQuanti +
+  scale_colour_distiller(palette = "Purples") +
+  theme_dark()
+```
+
+
+##
+
+::: columns
+::: {.column width="50%"}
+
+
+On peut aussi récupérer d'autres palettes de R
+
+```{r }
+#| fig-width: 5
+#| fig-align: center
+MonNuageCouleurQuanti + scale_colour_gradientn(colors = terrain.colors(5))
+```
+:::
+
+::: {.column width="50%"}
+::: fragment
+et faire en fait tout ce que l'on veut ! (mais ça, on le savait déjà).
+
+```{r}
+MonNuageCouleurQuanti + scale_colour_gradient(low = "red", high = "blue")
+
+```
+:::
+:::
+:::
+
+
+##
+
+::: columns
+::: {.column width="50%"}
+
+
+On peut aussi récupérer d'autres palettes de R
+
+```{r }
+#| fig-width: 5
+#| fig-align: center
+MonNuageCouleurQuanti + scale_colour_gradientn(colors = terrain.colors(5))
+```
+:::
+
+::: {.column width="50%"}
+::: fragment
+et faire en fait tout ce que l'on veut ! (mais ça, on le savait déjà).
+
+```{r}
+MonNuageCouleurQuanti +
+  scale_colour_gradient(low = "red", high = "blue", breaks = seq(12, 20, by = 3))
+
+```
+:::
+:::
+:::
+
+
+
+## Pour des formes aussi !
+
+A un `aesthetic` correspond une échelle, donc si mon `aesthetic` est une forme, alors une échelle lui est associée (pas de discrimination !) et on peut donc la modifier avec les fonctions `scale_shape_*()`.
+
+```{r eval=F}
+MonNuageForme <- MonNuage + aes(shape = species)
+MonNuageForme + scale_shape(solid = FALSE)
+MonNuageForme + scale_shape_manual(values = c(4, 8, 15))
+MonNuageForme + scale_shape_manual(values = c("*", "@", "x"))
+```
+
+
+```{r}
+#| echo: false
+#| fig-align: center
+#| fig-width: 12
+MonNuageForme <- MonNuage + aes(shape = species)
+(MonNuageForme + scale_shape(solid = FALSE))|(MonNuageForme + scale_shape_manual(values = c(4, 8, 15)))|(MonNuageForme + scale_shape_manual(values = c("*", "@", "x")))
+
+```
+
+## 
+
+Et si je veux modifier quelques bricoles dans ma légende, aucun problème, je peux aussi faire ce genre de choses :
+
+```{r }
+MonNuageForme + scale_shape(name = "Espèces",
+                            labels = c("Ad.","Ch.","Ge."))
+```
+
+Pour aller plus loin dans les modifications d'apparence de la légende (et d'autres choses, en fait de tout ce que l'on voit), il faut aller bricoler le thème... Ca devient très touchy et pas forcément d'une grande utilité, mais voyons quand même 2 ou 3 trucs. Un petit coup d'oeil à l'aide de la fonction `theme()` peut suffire à se convaincre de ne pas aller plus loin.
+
+```{r}
+MonNuageCouleur + ggtitle("Mon joli graphique") +
+  theme(legend.position = "bottom",
+        legend.title = element_text(face = "bold"),
+        axis.title.x = element_text(face = "italic"),
+        plot.title = element_text(colour = "purple", 
+                                  size = rel(1.5),
+                                  hjust = 0.5))       # centrage du titre
+```
+
+
+
+## Comment zoomer ou changer les axes dans `ggplot2`
+
+
+::: {.callout-caution}
+## Important !!
+__Use `coord_cartesian` to zoom, not `xlim`, `ylim`, or `scale_*`__
+:::
+
+
+:::: .columns
+
+::: .column
+```{r}
+
+p_boxplot <- ggplot(penguins, aes(x = species, y = bill_length_mm)) +
+  geom_boxplot() +
+  geom_point(aes(size = bill_depth_mm),
+             alpha = 0.2, position = "jitter")
+
+p_boxplot_1 <- p_boxplot + ylim(c(40,50))
+```
+:::
+
+::: .column
+```{r}
+p_boxplot_2 <- p_boxplot +
+  coord_cartesian(ylim=c(40,50))
+```
+:::
+
+::::
+
+```{r,fig.height=6,fig.width=16,fig.align='center',echo=F}
+require(patchwork)
+(p_boxplot + ggtitle("base plot")+ geom_hline(yintercept = c(40,50),linetype="dashed")) + (p_boxplot_1  + ggtitle("with ylim")) + (p_boxplot_2 + ggtitle("with coord_cartesian")) & theme(legend.position ="bottom")
+```
+
+
+
+
+## Mon graphique est parfait, je veux le sauvegarder !
+
+Deux solutions possibles :
+
+- Je sauve l'objet dans mon environnement de travail : fonction  `save()`, en fait comme n'importe quel objet `R`. En fait, ça, on l'a déjà pratiqué.
+
+- Je sauvegarde la figure dans un fichier graphique : fonction `ggsave()`. Consulter l'aide de `ggsave()` pour en savoir plus, mais ne vous attendez pas à de grandes surprises. Seule précaution à signaler : il faut réaliser le graphique, puis le sauvegarder (pas comme avec les fonctions `pdf()`, `jpeg()`, `png()` qu'il faut appeler avant de réaliser le graphique et qu'il faut ensuite fermer avec `dev.off()`).
+
+```{r, eval = FALSE}
+ggsave("perfect!.png")
+```
+
+
+
+## Quelques extensions sympas
+
+### A best-of:
+
+* {[patchwork](https://patchwork.data-imaginist.com/)}: Combine/Assemble ggplots.
+* {[ggforce](https://ggforce.data-imaginist.com/)}: Provide missing functionality to `ggplot2`.
+* {[ggtext](https://wilkelab.org/ggtext/)}: Improved text rendering support for `ggplot2`.
+
+### Interactive packages
+
+* {[ggedit](https://github.com/yonicd/ggedit)}: Interactively edit ggplot layers, scales and themes aesthetics.
+* {[esquisse](https://github.com/dreamRs/esquisse)}: Interactively explore your data by visualizing it with the ggplot2 package.
+
+### Other useful packages
+
+* Themes:  {[ggthemr](https://github.com/Mikata-Project/ggthemr)} and {[ggthemes](https://jrnold.github.io/ggthemes/reference/index.html)}.
+* Colors: {[MetBrewer](https://github.com/BlakeRMills/MetBrewer/tree/main)}.
+* Put statistics on `ggplot2`: {[ggpubr](https://rpkgs.datanovia.com/ggpubr/)} and {[ggstatsplot](https://github.com/IndrajeetPatil/ggstatsplot)}.
+
+
+## Quelques extensions sympas
+
+
+### Disposition de plusieurs graphiques
+
+#### `patchwork`
+
+```{r}
+library(patchwork)
+```
+
+Le package `patchwork` permet de disposer plusieurs graphiques de façon très simple. Démonstration avec des `+` et des `/' !
+
+```{r fig.width=10}
+MonNuage + MonNuageCouleur
+```
+
+## Quelques extensions sympas
+
+
+### Disposition de plusieurs graphiques
+
+#### `patchwork`
+
+```{r}
+library(patchwork)
+```
+
+Le package `patchwork` permet de disposer plusieurs graphiques de façon très simple. Démonstration avec des `+` et des `/' !
+
+```{r}
+patchwork <- (MonNuage + MonNuageCouleur) / MonNuageForme
+patchwork + 
+  plot_layout(guides = "collect") +
+  plot_annotation(tag_levels = 'A')  & theme(legend.position = "bottom")
+
+```
+
+Et ce qui est bien aussi, c'est de pouvoir étiqueter chaque graphique...
+
+## `patchwork`
+
+...et de les aérer un peu.
+
+```{r fig.width=10}
+MonNuage + plot_spacer() + MonNuageCouleur + plot_spacer() + MonNuageForme
+```
+
+## `patchwork`
+
+ou au contraire de les superposer
+
+```{r fig.width=10}
+MonNuageCouleur + inset_element(MonNuage, left = 0.6, bottom = 0.5, right = 1, top  = 0.85)
+```
+
+
+Pour en apprendre plus : <https://patchwork.data-imaginist.com/articles/patchwork.html>
+
+## `patchwork`
+
+### Useful commands:
+
+* Combine plots with `+`, `|` or `/`.
+* Affect all plots with `&`: `(p1 | p2) / p3 & theme(legend.position="bottom")`.
+* Control the grid with `plot_layout()`.
+* Add annotation and style with `plot_annotation()`.
+* Insert a plot inside another with `inset_element()`.
+* Add blank area with `plot_spacer()`.
+
+## `cowplot`
+
+```{r}
+library(cowplot)
+```
+
+- Pour changer de thème
+
+::: {.panel-tabset}
+
+### `theme_cowplot()`
+
+```{r fig.width=10}
+MonNuageCouleur + theme_cowplot()
+```
+
+### `theme_minimal_grid()`
+
+```{r fig.width=10}
+MonNuageCouleur + theme_minimal_grid()
+```
+
+### `theme_minimal_hgrid()`
+
+```{r fig.width=10}
+MonNuageCouleur + theme_minimal_hgrid()
+```
+
+:::
+
+## `cowplot`
+
+- Pour disposer plusieurs graphiques (comme `patchwork`)
+
+```{r fig.width=10}
+plot_grid(MonNuageCouleurQuanti, MonNuageCouleur, labels = c('1', '2'))
+```
+
+## `cowplot`
+
+- Pour disposer plusieurs graphiques (comme `patchwork`)
+
+```{r fig.width=10}
+plot_grid(MonNuageCouleurQuanti, MonNuageCouleur, labels = "auto")
+```
+
+## `cowplot`
+
+- Pour disposer plusieurs graphiques (comme `patchwork`)
+
+```{r fig.width=10}
+plot_grid(MonNuageCouleurQuanti, MonNuageCouleur, labels = "AUTO")
+```
+
+## `cowplot`
+
+Jusqu'ici tout va bien, mais là, ça coince un peu non ?
+
+```{r fig.width=10}
+MonNuageCouleurAxe <- MonNuageCouleur + theme(axis.text.x = element_text(size = rel(3), angle = 90),
+                                              axis.text.y = element_text(size = rel(3)))
+plot_grid(MonNuageCouleurAxe, MonNuageCouleur)
+```
+
+## `cowplot`
+
+Non ? pas de souci ? et là, n'est-ce pas mieux ?
+
+```{r fig.width=10}
+plot_grid(MonNuageCouleurAxe, MonNuageCouleur, align = "h")
+```
+
+Et oui, c'est quand même mieux d'aligner les 2 graphiques !
+
+## `cowplot`
+
+Et dans l'autre sens :
+
+```{r fig.width=10}
+plot_grid(MonNuageCouleurAxe, MonNuageCouleur, ncol = 1)
+plot_grid(MonNuageCouleurAxe, MonNuageCouleur, ncol = 1, align = "v")
+```
+
+
+Pour en savoir plus : <https://cran.r-project.org/web/packages/cowplot/vignettes/introduction.html>
+
+## Interactivité
+
+```{r}
+library(plotly)
+```
+
+L'utilisation de `ggplot2` avec `plotly`  n'est pas obligatoire, mais maintenant que l'on connaît, on ne va quand même pas s'en priver.
+
+Alors allons-y !
+
+
+```{r}
+#| fig-align: center
+#| fig-width: 6
+#| fig-height: 4
+ggplotly(MonNuageCouleur)
+```
+
+Il n'y a plus qu'à promener sa souris sur le graphique pour voir ce que cela donne.
+
+## Interactivité
+
+En explorant un peu l'aide en ligne, on peut gérer ce qui apparaît sous le curseur de la souris quand on le déplace.
+
+::: {.panel-tabset}
+
+## Valeurs des coordonnées `x` et `y`
+
+```{r}
+#| fig-align: center
+#| fig-width: 6
+#| fig-height: 4
+ggplotly(MonNuageCouleur, tooltip = c("x","y"))
+```
+
+## Valeurs des couleurs
+
+```{r}
+#| fig-align: center
+#| fig-width: 6
+#| fig-height: 4
+ggplotly(MonNuageCouleur, tooltip = c("colour"))
+```
+
+::: 
+
+## `ggforce`
+
+A very complete package wich add a lot of missing features. Check the full list at https://ggforce.data-imaginist.com/reference/index.html.
+
+
+* `facet_zoom()`: Create a zoom facet for a plot.
+* `facet_matrix()`: Allow to put differents columns into different rows and columns in a grid of panels.
+* `geom_mark_*`: Graphical annotation of data.
+
+## `ggforce`
+
+```{r,fig.align='center',fig.height=6,fig.width=12,message=F,warning=F}
+require(ggforce)
+ggplot(penguins, aes(bill_length_mm, flipper_length_mm, colour = species)) +
+    geom_point() +
+    facet_zoom(xy = species == "Adelie")
+```
+
+
+## `ggforce::facet_zoom()`
+
+```{r,fig.align='center',fig.height=6,fig.width=12}
+ggplot(penguins, aes(bill_length_mm, flipper_length_mm, colour = species)) +
+    geom_point() +
+  facet_zoom(xlim = c(40, 50))
+```
+
+
+
+## `ggforce::facet_zoom()` for my zooming issue
+
+```{r,fig.align='center',fig.height=6,fig.width=12}
+p_boxplot <- ggplot(penguins, aes(x = species, y = bill_length_mm)) +
+  geom_boxplot() +
+  geom_point(aes(size = bill_depth_mm),
+             alpha = 0.2, position = "jitter")+ theme(legend.position ="bottom")
+
+p_boxplot  +  facet_zoom(ylim = c(40,50))
+```
+
+
+
+## `ggforce::facet_matrix()`
+
+
+```{r,fig.align='center',fig.height=6,fig.width=12}
+
+ggplot(penguins %>% drop_na(), aes(col = sex, fill = sex)) +
+  geom_autopoint() +
+  facet_matrix(rows = vars(island:body_mass_g),
+               switch = "x", layer.diag = 2) +
+  theme(axis.text.x = element_text(angle = 90)) +
+  geom_autohistogram()
+
+penguins %>% ggplot(aes(col=species,fill=species)) +
+  geom_autopoint() +
+  geom_autodensity() +
+  facet_matrix(vars(-species),layer.diag = 2)
+```
+
+
+## Interactivité
+
+Et on peut bien sûr l'utiliser sur des graphiques autres que nuages de points.
+
+```{r}
+#| fig-align: center
+#| fig-width: 8
+MesBoxplots <- ggplot(penguins,aes(x=species, y=body_mass_g,
+                                colour=species)) + geom_boxplot()
+ggplotly(MesBoxplots)
+```
+
+## Interactivité
+
+Et on peut bien sûr l'utiliser sur des graphiques autres que nuages de points.
+
+```{r}
+#| fig-align: center
+#| fig-width: 8
+ggplotly(Histogramme)
+```
+
+Noter que l'interactivité reste disponible dans un fichier html.
+
+## *Publication ready plots*
+
+*The `ggpubr` package provides some easy-to-use functions for creating and customizing `ggplot2`- based publication ready plots.*
+
+C'est un peu dommage de se priver de la syntaxe de `ggplot2` une fois qu'on la connaît, mais il y a peut-être des choses sympas à trouver dans ce package.
+
+```{r}
+library(ggpubr)
+```
+
+```{r}
+MonGraphiqueggpubr <- ggboxplot(penguins, x = "species", y  = "body_mass_g",
+                                color = "species", add = "jitter")
+MonGraphiqueggpubr
+```
+
+## *Publication ready plots*
+
+Pour ajouter la p-value d'un test de Kruskal-Wallis (par défaut), c'est immédiat.
+
+```{r}
+MonGraphiqueggpubr + stat_compare_means()
+```
+
+## *Publication ready plots*
+
+et si on préfère l'ANOVA, pas de souci
+
+```{r}
+MonGraphiqueggpubr + stat_compare_means(method = "anova")
+```
+
+
+## *Publication ready plots*
+
+Jusqu'ici, pas de quoi sauter au plafond, on aurait gérer plus ou moins bien le truc avec un peu plus de code. En revanche, pour les comparaisons 2 à 2 , c'est quand même pas mal.
+
+```{r}
+MesComparaisons <- list( c("Adelie", "Chinstrap"),
+                         c("Adelie", "Gentoo"),
+                         c("Gentoo", "Chinstrap") )
+MonGraphiqueggpubr + stat_compare_means(comparisons = MesComparaisons)
+```
+
+## *Publication ready plots*
+
+Pour la totale :
+
+```{r}
+MonGraphiqueggpubr +
+  stat_compare_means(comparisons = MesComparaisons) +
+  stat_compare_means(label.y = 5)
+```
+
+## *Publication ready plots*
+
+avec des étoiles selon le découpage indiqué dans l'aide de la fonction  `stat_compare_means` :
+
+```{r}
+symnum.args <- list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, 1), symbols = c("****", "***", "**", "*", "ns"))
+MonGraphiqueggpubr +
+  stat_compare_means(comparisons = MesComparaisons, label = "p.signif") +
+  stat_compare_means(label.y = 5)
+```
+
+## *Publication ready plots*
+
+Et si je préfère les violons (avec les boxplots à l'intérieur !)
+
+```{r}
+ggviolin(penguins, x = "species", y  = "body_mass_g",
+                                color = "species", add = "boxplot") +
+  stat_compare_means(comparisons = MesComparaisons, label = "p.signif") +
+  stat_compare_means(label.y = 5)
+```
+
+Et d'autres choses plus ou moins utiles à voir ici : <https://rpkgs.datanovia.com/ggpubr>
+
+
+## Ressources
+
+Voici quelques liens pour étoffer le survol que nous venons de faire.
+
+- Le site web <https://ggplot2.tidyverse.org/>
+
+- La documentation <https://ggplot2.tidyverse.org/reference/>
+
+- Le livre *ggplot2 Elegant Graphics for Data Analysis*  <https://ggplot2-book.org/>
+
+- La cheatsheet de `ggplot2` <https://raw.githubusercontent.com/rstudio/cheatsheets/master/data-visualization.pdf>
+
+- Des packages de l'écosystème `ggplot2` <https://exts.ggplot2.tidyverse.org/gallery>
+
+## Et maintenant, amusez-vous !
