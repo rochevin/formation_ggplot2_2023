@@ -17,7 +17,7 @@ require(knitr)
 require(kableExtra)
 require(tidyverse)
 require(palmerpenguins)
-require(tidyr)
+require(stringr)
 
 penguins <- palmerpenguins::path_to_file(path = "penguins.csv") %>% read_csv()
 options(kableExtra.latex.load_packages = FALSE)
@@ -39,187 +39,9 @@ knitr::opts_chunk$set(dev = 'svg',fig.retina = 3, warning = FALSE, message = FAL
 -   Learn to get things done
 -   Have fun!
 
-## Grammar of Graphics
-
-::: callout-note
-**Grammaire** : nom féminin, XIIe siècle. Dérivé du latin grammatica, emprunté du grec grammatikê, « grammaire, culture ». Ensemble des règles qui forment le système d'une langue et que l'on doit suivre pour parler ou écrire conformément à l'usage (Dictionnaire de l'académie Française, 9e édition)
-:::
-
-Grammar gives language rules. Wilkinson 2005
-
-## Grammar of Graphics
-
-### Set of rules to go from a data table to a plot
-
-::: columns
-::: column
-#### Variable space
-
-```{r, echo=F,results='asis'}
-
-one_data <- data.frame(
-A = c(2:7),
-B = c(14,15,21,18,13,12),
-C = c(rep("O",2),rep("N",3),rep("O",1))
-)
-
-kable(one_data,caption = "some data") %>%
-  kable_styling(bootstrap_options = c("striped", "hover"))
-```
-:::
-
-::: column
-#### Plot
-
-```{r}
-#| echo: false
-
-p_one_data <- ggplot(data=one_data,aes(x=A,y=B,col=C,shape=C)) + geom_point()
-print(p_one_data)
-```
-:::
-:::
-
-## Grammar of Graphics
-
-::: columns
-::: {.column width="20%"}
-#### Variable space
-
-```{r, echo=F,results='asis'}
-
-one_data <- data.frame(
-A = c(2:7),
-B = c(14,15,21,18,13,12),
-C = c(rep("O",2),rep("N",3),rep("O",1))
-)
-
-kable(one_data,caption = "some data") %>%
-  kable_styling(bootstrap_options = c("striped", "hover"))
-```
-:::
-
-::: {.column width="40%"}
-#### Aesthetic space
-
-```{r, echo=F,results='asis'}
-aes_vals <- ggplot_build(p_one_data)$data[[1]]
-
-kable(aes_vals) %>%
-  kable_styling(bootstrap_options = c("striped", "hover"))
-
-```
-:::
-
-::: {.column width="40%"}
-#### Plot
-
-```{r}
-#| echo: false
-
-ggplot(data=one_data,aes(x=A,y=B,col=C,shape=C)) + geom_point()
-```
-:::
-:::
-
-> The grammar tells us that a statistical graphic is a mapping from data to aesthetic attributes (colour, shape, size) of geometric objects (points, lines, bars).[^1]
-
-[^1]: H. Wickham. ggplot2: Elegant Graphics for Data Analysis. Use R!, Springer https://ggplot2-book.org
-
-## Aesthetics & Scales
-
-### Aesthetics
-
--   Properties that can be perceived on the graphic: **location, colour, shape, size**
-
--   Each aesthetic can be mapped to a variable or set to a constant value
-
-::: fragment
-### Scales
-
-### Controls the mapping from data to aesthetics
-
--   Scale : function from a region in data space to a region in aesthetic space.
--   Without a scale, there is no way to go from the data to aesthetics so **a scale is required for every aesthetics used on the plot**
--   For position aesthetics, the axes are the guides, for all other aesthetics, legends do the job
-:::
-
-## Geometric object (layer)
-
-### *Layers are responsible for creating the objects that we perceive on the plot.*
-
-### *The plot is not ready to be displayed until at least one layer is added.*
-
-### Minimal layer: specify a geom
-
--   Performs the actual rendering of the layer
--   Control the type of plot that you create
-
-## Layered Grammar of Graphics
-
--   **Defaults**
-    -   Data
-    -   Mapping from variables to aesthetics
--   **Layer**
--   [Data (optional, if already defined)]{style="color:gray;"}
--   [Mapping (optional, if already defined)]{style="color:gray;"}
--   Geometric object
--   Statistical transformation
--   Position adjustement
--   **Scale**: controls the mapping from data to aesthetic attributes, one scale or each aesthetic property
--   <b>Coord</b>inate system
--   **Facet** specification : to build the same plot for different subsets of the dataset
-
-## `ggplot2`: a plot is an object
-
-::: columns
-::: {.column width="50%"}
-### A plot object is a list with:
-
--   Data (stored in the plot object)
--   Mapping
--   Layers
--   Scales
--   Coordinates
--   Facet
-:::
-
-::: {.column width="50%"}
-::: fragment
-```{r}
-#| echo: false
-
-str(p_one_data)
-
-```
-:::
-:::
-:::
-
-## `ggplot2`: data
-
-```{r,fig.align='center'}
-MyPlot <- ggplot(data=iris)
-MyPlot
-```
-
-## `ggplot2`: aesthetics
-
-```{r,fig.align='center'}
-MyPlot <- ggplot(data=iris,aes(x=Petal.Length,y=Petal.Width,colour=Species))
-MyPlot
-```
-
-## `ggplot2`: layer with geom
-
-```{r,fig.align='center'}
-MyPlot <- MyPlot + geom_point()
-MyPlot
-```
-
 ## `ggplot2` training
 
-```{r,echo=F,warning=F,message=F,fig.align='center',fig.height=6,fig.width=14}
+```{r,eval=F,echo=F,warning=F,message=F,fig.align='center',fig.height=6,fig.width=14}
 require(ggbump)
 data_progression <- tibble(
   Parts = c("Read data","Manipulate Data","Plot data","Customize<br>your plots"),
@@ -365,9 +187,7 @@ print(p0.training)
 -   Heavily documented and used.
 -   [A lot of extensions](https://github.com/erikgahner/awesome-ggplot2).
 
-```{r out.width = "100%", fig.align = "center",echo=F}
-knitr::include_graphics("imgs/ggplot2_gallery.svg")
-```
+![](imgs/ggplot2_gallery.svg){fig-align="center"}
 
 <sub>[Thomas Mock (2022). Tidy Tuesday: A weekly data project aimed at the R ecosystem.](https://github.com/rfordatascience/tidytuesday)</sub>
 
@@ -417,217 +237,226 @@ require(tidyverse)
 ✖ dplyr::lag()    masks stats::lag()
 ```
 
-### Content
+## Grammar of Graphics
 
-```{r,echo=F}
-data_progression %>% dplyr::select(Parts,Tools) %>%
-  mutate_all(function(x){str_replace(x,"<br>"," ")}) %>% 
-  kable(format="markdown") 
-```
+::: callout-note
+**Grammaire** : nom féminin, XIIe siècle. Dérivé du latin grammatica, emprunté du grec grammatikê, « grammaire, culture ». Ensemble des règles qui forment le système d'une langue et que l'on doit suivre pour parler ou écrire conformément à l'usage (Dictionnaire de l'académie Française, 9e édition)
+:::
 
-## Tidy data
+Grammar gives language rules. Wilkinson 2005
 
-> **Tidying:** structuring datasets to facilitate analysis.
+## Grammar of Graphics
 
-A tidy dataset :
+### Set of rules to go from a data table to a plot
 
-```{r out.width = "100%", fig.align = "center",echo=F}
-knitr::include_graphics("imgs/tidy-1.png")
-```
-
-## Why tidying a dataset ?
-
-```{r define, echo=F, message=FALSE, warning=FALSE}
-treatments <- 
-    data.frame(
-        treatment_a = sample(10:25,size = 3,replace = T),
-        treatment_b = sample(10:25,size = 3,replace = T),
-        treatment_c = sample(10:25,size = 3,replace = T)
-    )
-rownames(treatments) <- c("John Smith","Jane Doe","Mary Johnson")
-```
-
-```{r show1,results='asis',echo=F}
-treatments %>% kable(caption = "Typical presentation dataset") %>%
-  kable_styling(bootstrap_options = c("striped", "hover"))
-```
-
-```{r boxplot1, echo=T, fig.height=3.5, fig.width=8,fig.align='center'}
-boxplot(treatments)
-```
-
-## Why tidying a dataset ?
-
-```{r,echo=T}
-treatments.2 <- t(treatments)
-```
+::: columns
+::: column
+#### Variable space
 
 ```{r, echo=F,results='asis'}
-kable(treatments.2,caption = "The same data but structured differently") %>%
+
+one_data <- data.frame(
+A = c(2:7),
+B = c(14,15,21,18,13,12),
+C = c(rep("O",2),rep("N",3),rep("O",1))
+)
+
+kable(one_data,caption = "some data") %>%
   kable_styling(bootstrap_options = c("striped", "hover"))
 ```
+:::
 
-```{r boxplot2, echo=T, fig.height=3.5, fig.width=8,fig.align='center'}
-
-boxplot(treatments.2)
-```
-
-## Why tidying a dataset ?
+::: column
+#### Plot
 
 ```{r}
-treatments.3 <- tibble::rownames_to_column(treatments,var = "person")
-treatments.3 <- tidyr::pivot_longer(treatments.3,-person,names_to = "treatment",values_to = "result")
-```
+#| echo: false
 
-```{r echo=FALSE, message=FALSE, warning=FALSE,results='asis'}
-treatments.3 %>% mutate(treatment = cell_spec(treatment, align = "c",background =factor(treatment,unique(treatments.3$treatment),RColorBrewer::brewer.pal(length(unique(treatments.3$treatment)), "Spectral")))) %>% mutate(person = cell_spec(person, align = "c",background =factor(person,unique(treatments.3$person),RColorBrewer::brewer.pal(length(unique(treatments.3$treatment)), "Set1")))) %>% 
-    mutate(result = cell_spec(result, align = "c",background ="black",color = "white")) %>% kable(caption = "An exemple of a tidy dataset",escape=F) %>%
+p_one_data <- ggplot(data=one_data,aes(x=A,y=B,col=C,shape=C)) + geom_point()
+print(p_one_data)
+```
+:::
+:::
+
+## Grammar of Graphics
+
+::: columns
+::: {.column width="20%"}
+#### Variable space
+
+```{r, echo=F,results='asis'}
+
+one_data <- data.frame(
+A = c(2:7),
+B = c(14,15,21,18,13,12),
+C = c(rep("O",2),rep("N",3),rep("O",1))
+)
+
+kable(one_data,caption = "some data") %>%
   kable_styling(bootstrap_options = c("striped", "hover"))
 ```
+:::
 
-## Why tidying a dataset ?
+::: {.column width="40%"}
+#### Aesthetic space
 
-```{r boxplot3, echo=TRUE, fig.height=5, fig.width=8, message=FALSE, warning=FALSE,fig.align='center'}
-boxplot(result~treatment,data=treatments.3)
+```{r, echo=F,results='asis'}
+aes_vals <- ggplot_build(p_one_data)$data[[1]]
+
+kable(aes_vals) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+
 ```
+:::
 
-## Why tidying a dataset ?
-
-```{r boxplot4, echo=TRUE, fig.height=5, fig.width=8, message=FALSE, warning=FALSE,fig.align='center'}
-boxplot(result~person,data=treatments.3)
-```
-
-## Why tidying a dataset ?
-
-```{r boxplot5, echo=TRUE, fig.height=5, fig.width=8, message=FALSE, warning=FALSE,fig.align='center'}
-boxplot(result~person+treatment,data=treatments.3)
-```
-
-## Read a dataset
-
-```{r,echo=F,warning=F,message=F,fig.align='center',fig.height=6,fig.width=14}
-p1.training
-```
-
-## Read a dataset with base `R`
+::: {.column width="40%"}
+#### Plot
 
 ```{r}
-read.table(file = "iris.tsv",sep="\t",header = T)
+#| echo: false
+
+ggplot(data=one_data,aes(x=A,y=B,col=C,shape=C)) + geom_point()
 ```
+:::
+:::
 
-## Read a dataset with base `R`
+> The grammar tells us that a statistical graphic is a mapping from data to aesthetic attributes (colour, shape, size) of geometric objects (points, lines, bars).[^1]
 
--   Return a `data.frame` object.
--   `read.csv`, `read.csv2`, `read.delim` can also be used.
--   Cannot read `.xsl` files (we have to use another package).
+[^1]: H. Wickham. ggplot2: Elegant Graphics for Data Analysis. Use R!, Springer https://ggplot2-book.org
 
-## Read a dataset with `readr`
+## Data
+
+::: callout-warning
+## Format
+
+It must be a `data.frame` (or a `tibble`)
+:::
+
+::: columns
+::: column
+### Good
 
 ```{r}
-read_tsv(file = "iris.tsv")
+penguins
+iris
 ```
+:::
 
-## Read a dataset with `readr`
+::: column
+### Not good
 
--   Return a `tibble` object.
--   `read_csv`, `read_csv2`, `read_table` can also be used.
--   `.xsl` files are managed by `readxl`, an other tidyverse package (not loaded by default).
+``` r
+gene_matrix
 
-## Tibbles: `tibble::tibble()`
-
-**Pros:**
-
--   Cells can contain list and data.frame.
--   It never changes an input's type (i.e., no more `stringsAsFactors = FALSE`!).
--   Can use not valid R variable names (`:)`) as column names.
--   Refined print method that shows only the first 10 rows.
-
-**Cons:**
-
--   It never uses `row.names()`.
-    -   use `tibble::rownames_to_column()`.
-
-## Data manipulation with `dplyr` and `tidyr`
-
-```{r,echo=F,warning=F,message=F,fig.align='center',fig.height=6,fig.width=14}
-p2.training
+      [,1] [,2] [,3] [,4]
+ [1,]   58   66   51   56
+ [2,]   61   52   63   66
+ [3,]   60   67   59   65
+ [4,]   67   61   61   50
+ [5,]   61   75   55   60
+ [6,]   50   64   54   78
+ [7,]   68   60   60   66
+ [8,]   65   55   64   71
+ [9,]   58   58   72   60
+[10,]   60   59   62   50
+[11,]   52   60   70   38
+[12,]   56   53   66   67
+[13,]   54   57   48   60
+[14,]   76   61   48   69
+[15,]   68   64   75   52
 ```
+:::
+:::
 
-## Data manipulation with `dplyr` and `tidyr`
+## Aesthetics & Scales
 
-#### dplyr is a grammar of data manipulation, providing a consistent set of verbs that help you solve the most common data manipulation challenges:
+### Aesthetics
 
--   `mutate()` adds new variables that are functions of existing variables
--   `select()` picks variables based on their names.
--   `filter()` picks cases based on their values.
--   `summarise()` reduces multiple values down to a single summary.
--   `arrange()` changes the ordering of the rows.
--   `group_by()` perform any operation "by group".
+-   Properties that can be perceived on the graphic: **location, colour, shape, size**
 
-#### Some examples :
+-   Each aesthetic can be mapped to a variable or set to a constant value
+
+::: fragment
+### Scales
+
+### Controls the mapping from data to aesthetics
+
+-   Scale : function from a region in data space to a region in aesthetic space.
+-   Without a scale, there is no way to go from the data to aesthetics so **a scale is required for every aesthetics used on the plot**
+-   For position aesthetics, the axes are the guides, for all other aesthetics, legends do the job
+:::
+
+## Geometric object (layer)
+
+### *Layers are responsible for creating the objects that we perceive on the plot.*
+
+### *The plot is not ready to be displayed until at least one layer is added.*
+
+### Minimal layer: specify a geom
+
+-   Performs the actual rendering of the layer
+-   Control the type of plot that you create
+
+## Layered Grammar of Graphics
+
+-   **Defaults**
+    -   Data
+    -   Mapping from variables to aesthetics
+-   **Layer**
+-   [Data (optional, if already defined)]{style="color:gray;"}
+-   [Mapping (optional, if already defined)]{style="color:gray;"}
+-   Geometric object
+-   Statistical transformation
+-   Position adjustement
+-   **Scale**: controls the mapping from data to aesthetic attributes, one scale or each aesthetic property
+-   <b>Coord</b>inate system
+-   **Facet** specification : to build the same plot for different subsets of the dataset
+
+## `ggplot2`: a plot is an object
 
 ::: columns
 ::: {.column width="50%"}
-```{r}
-summarise(iris,mean(Petal.Width))
-```
+### A plot object is a list with:
+
+-   Data (stored in the plot object)
+-   Mapping
+-   Layers
+-   Scales
+-   Coordinates
+-   Facet
 :::
 
 ::: {.column width="50%"}
+::: fragment
 ```{r}
-summarise(group_by(iris,Species),mean(Petal.Width))
+#| echo: false
+
+str(p_one_data)
+
 ```
 :::
 :::
+:::
 
-## Pipes
+## `ggplot2`: data
 
-**The pipe %\>%:**
-
--   Come from the \textbf{magrittr} package by Stefan Milton Bache.
--   Automatically loaded in tidyverse.
--   Equivalent to `|` in `bash`
-
-```{bash echo=TRUE}
-cat iris.tsv | cut -f5 | sed 's/^./\U&/' | head
+```{r,fig.align='center'}
+MyPlot <- ggplot(data=iris)
+MyPlot
 ```
 
-```{r echo=TRUE, message=FALSE, warning=FALSE}
-read_tsv("iris.tsv",col_names = F) %>% pull(5) %>% str_to_title() %>% head
+## `ggplot2`: aesthetics
+
+```{r,fig.align='center'}
+MyPlot <- ggplot(data=iris,aes(x=Petal.Length,y=Petal.Width,colour=Species))
+MyPlot
 ```
 
-## Pipes vs no pipes : without pipe
+## `ggplot2`: layer with geom
 
-```{r,echo=FALSE}
-set.seed(123)
-```
-
-```{r histo1,echo=T, fig.height=3, fig.width=8,fig.align='center'}
-ex.dat <- rnorm(n = 1000,mean = 5,sd=1)
-sub.dat <- sample(ex.dat,size = 100,replace=F)
-hist(sub.dat)
-```
-
-## Pipes vs no pipes : without pipe
-
-```{r,echo=FALSE}
-set.seed(123)
-```
-
-```{r histo2,echo=T, fig.height=3, fig.width=8,fig.align='center'}
-hist(sample(rnorm(n = 1000,mean = 5,sd=1),size = 100,replace=F))
-```
-
-## Pipes vs no pipes : with pipe
-
-```{r,echo=FALSE}
-set.seed(123)
-```
-
-```{r histo3,echo=T, fig.height=3, fig.width=8,fig.align='center'}
-rnorm(n = 1000,mean = 5,sd=1) %>%
-    sample(size = 100,replace=F) %>%
-    hist()
+```{r,fig.align='center'}
+MyPlot <- MyPlot + geom_point()
+MyPlot
 ```
 
 ## Prepare `penguins` dataset for `ggplot2` {background-image="https://allisonhorst.github.io/palmerpenguins/logo.png" background-size="10%" background-position="100% 0%"}
@@ -645,8 +474,6 @@ require(palmerpenguins)
 penguins
 ```
 
-
-
 ## Premier graphique
 
 ### Au début, il existe mais il ne montre rien...
@@ -660,8 +487,7 @@ MonPremierGraphique
 
 ## Je ne vois rien ! Pourtant l'objet `MonPremierGraphique` existe et il contient plein de choses.
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### `summary(MonPremierGraphique)`
 
 ```{r}
@@ -697,15 +523,12 @@ head(MonPremierGraphique$data)
 ```{r}
 MonPremierGraphique$layers
 ```
-
 :::
 
-
-::: {.fragment}
+::: fragment
 > HW a dit : *The plot is not ready to be displayed until one layer is added.*
 
 OK, donc c'est normal si je ne vois rien, car le composant `layers` de l'objet `MonPremierGraphique` ne contient rien.
-
 :::
 
 ## ... alors j'essaie d'y mettre des choses...
@@ -723,7 +546,7 @@ C'est mieux, je vois des axes avec les variables que je veux représenter en x e
 
 ## ... et finalement, je vois !
 
-Alors, je vais ajouter un `layer`. Pour cela, plein de fonctions existent pour dire quels objets géométriques je veux utiliser pour la représentation. Soyons modestes, commençons par des points avec la fonction `geom_point()`. 
+Alors, je vais ajouter un `layer`. Pour cela, plein de fonctions existent pour dire quels objets géométriques je veux utiliser pour la représentation. Soyons modestes, commençons par des points avec la fonction `geom_point()`.
 
 ```{r}
 MonPremierGraphique + geom_point()
@@ -734,16 +557,15 @@ MonPremierGraphique + geom_point()
 ## ... et finalement, je vois !
 
 Sauvons-le et auscultons-le.
+
 ```{r}
 MonPremierGraphiqueLeVrai <- MonPremierGraphique + geom_point()
 ```
-
 
 ```{r}
 summary(MonPremierGraphiqueLeVrai)
 MonPremierGraphiqueLeVrai$layers
 ```
-
 
 Il a bien un `layer` et c'est pourquoi je peux voir quelque chose.
 
@@ -755,11 +577,9 @@ Reprenons l'objet `MonPremierGraphique`
 MonPremierGraphique
 ```
 
-
 ## Pour mieux (?) comprendre ce qui se passe
 
 On sait qu'il n'affiche rien car il n'a pas de `layer`. On a ajouté un `layer` avec la fonction `geom_point()`.
-
 
 ```{r}
 MonPremierGraphique + geom_point()
@@ -790,7 +610,7 @@ A noter qu'il existe une façon de faire la même chose en cachant encore plus l
 qplot(bill_length_mm, bill_depth_mm, data = penguins)
 ```
 
-Mais, dans la préface à la 2eme édition de *`ggplot:` Elegant Graphics for Data Analysis* 
+Mais, dans la préface à la 2eme édition de *`ggplot:` Elegant Graphics for Data Analysis*
 
 > HW a dit : *Switched from `qplot()` to `ggplot()` in the introduction, Chapter 2. Feedback indicated that `qplot()` was a crutch: it makes simple plots a little easier, but it doesn't help with mastering the grammar.*
 
@@ -800,14 +620,13 @@ Et effectivement, en utilisant `qplot()`, on garde à peu près nos habitudes li
 
 Pour faire un graphique :
 
-- les données sont stockées dans un `data.frame` et pas autrement, ce n'est pas négociable !
+-   les données sont stockées dans un `data.frame` et pas autrement, ce n'est pas négociable !
 
-- les `aesthetics mappings` lient des variables du jeu de données à des propriétés visuelles (utiliser la fonction `aes()`).
+-   les `aesthetics mappings` lient des variables du jeu de données à des propriétés visuelles (utiliser la fonction `aes()`).
 
-- seul l'ajout d'un `layer` permet de visualiser quelque chose (utiliser les fonctions `geom_*()`).
+-   seul l'ajout d'un `layer` permet de visualiser quelque chose (utiliser les fonctions `geom_*()`).
 
-- Ce qui donne une syntaxe comme celle-ci : 
-`ggplot(data = penguins, aes(x = bill_length_mm, y = bill_depth_mm)) + geom_point()`
+-   Ce qui donne une syntaxe comme celle-ci : `ggplot(data = penguins, aes(x = bill_length_mm, y = bill_depth_mm)) + geom_point()`
 
 On est bon ? Oui ? alors, on continue...
 
@@ -879,35 +698,27 @@ L'impression est différente. A méditer...
 
 ## Et si je m'amusais avec les autres variables
 
-:::: {.columns}
-
+::: columns
 ::: column
-
 ```{r fig.height=4}
 ggplot(data = penguins ,aes(x = flipper_length_mm, y = bill_length_mm,
                                 colour = bill_depth_mm,
                                 size = body_mass_g)) + geom_point()
 ```
-
 :::
 
 ::: column
-
-::: {.fragment}
-
+::: fragment
 Ouh là, là... c'est joli (ou pas), mais qu'ai-je donc fait ? Reprenons calmement :
 
-- je suis toujours dans un nuage de points (`geom_point()`) avec `flipper_length_mm` en abscisses (`aes(x= )`) et `bill_length_mm` en ordonnées (`aes(y= )`).
-- dans la fonction `aes()`, j'ai lié la couleur à la variable `bill_depth_mm` obtenant ainsi une dégradé de bleu (plus la valeur de `bill_depth_mm` est élevée, plus le symbole est clair).
-- toujours dans la fonction `aes()`, j'ai lié la taille à la variable `body_mass_g` obtenant ainsi des points d'autant plus grands que la valeur de `body_mass_g` est élevée.
-- pour le même prix, j'ai obtenu les deux légendes associées.
-- tous ces éléments illustrent la notion de `scaling` qui contrôle le lien entre les données et un attribut `aesthetic`. Tout attribut `aesthetic` a besoin d'une échelle. Parfois (souvent), on ne s'en rend pas compte parce qu'une valeur par défaut est prévue.
-
+-   je suis toujours dans un nuage de points (`geom_point()`) avec `flipper_length_mm` en abscisses (`aes(x= )`) et `bill_length_mm` en ordonnées (`aes(y= )`).
+-   dans la fonction `aes()`, j'ai lié la couleur à la variable `bill_depth_mm` obtenant ainsi une dégradé de bleu (plus la valeur de `bill_depth_mm` est élevée, plus le symbole est clair).
+-   toujours dans la fonction `aes()`, j'ai lié la taille à la variable `body_mass_g` obtenant ainsi des points d'autant plus grands que la valeur de `body_mass_g` est élevée.
+-   pour le même prix, j'ai obtenu les deux légendes associées.
+-   tous ces éléments illustrent la notion de `scaling` qui contrôle le lien entre les données et un attribut `aesthetic`. Tout attribut `aesthetic` a besoin d'une échelle. Parfois (souvent), on ne s'en rend pas compte parce qu'une valeur par défaut est prévue.
 :::
-
 :::
-
-::::
+:::
 
 ## En vue éclatée
 
@@ -938,8 +749,7 @@ MonPremierGraphiqueLeVrai +
 
 Avec un deuxième facteur, on peut réaliser (très facilement, on s'en doute) toute une planche de graphiques, cette fois-ci avec `facet_grid()`.
 
-:::{.panel-tabset}
-
+::: panel-tabset
 ### `species ~ island`
 
 ```{r fig.width = 5}
@@ -957,16 +767,11 @@ MonPremierGraphiqueLeVrai + facet_grid()
 ```{r fig.width = 5}
 MonPremierGraphiqueLeVrai + facet_grid(species ~ sex)
 ```
-
 :::
-
-
 
 ## Histogramme
 
 ### C'est bien mais il n'y a pas que les nuages de points dans la vie
-
-
 
 Pour réaliser un histogramme, il suffit... de le demander. On utilise toujours le data.frame `penguins` avec cette fois-ci seulement une variable (ici `flipper_length_mm` en `x`).
 
@@ -980,7 +785,7 @@ OK, pas génial, mais on a bien un histogramme. Histogramme sur lequel, on peut 
 
 ## Histogramme
 
-- Le `facetting` pour avoir un histogramme par modalité du facteur `species`
+-   Le `facetting` pour avoir un histogramme par modalité du facteur `species`
 
 ```{r }
 Histogramme + facet_wrap(~species)
@@ -988,8 +793,7 @@ Histogramme + facet_wrap(~species)
 
 ## Histogramme
 
-
-- et aussi des couleurs (même si l'interprétation n'en est pas forcément améliorée)
+-   et aussi des couleurs (même si l'interprétation n'en est pas forcément améliorée)
 
 ```{r }
 Histogramme + aes(colour = species)
@@ -1000,7 +804,7 @@ Histogramme + aes(fill = species)
 
 Au fait, vous avez vu qu'il nous embête avec un warning qui parle de `stat_bin()`.
 
-> HW a dit : *The choice of bins is very important for histograms [...]. In `ggplot2`, a very simple heuristic is used for the default number of bins: it uses 30, regardless of the data. This is perverse, and ignores all of the research on selecting good bin sizes automatically, but sends a clear message to the user that they need to think about and experiment with the bin width.* 
+> HW a dit : *The choice of bins is very important for histograms \[...\]. In `ggplot2`, a very simple heuristic is used for the default number of bins: it uses 30, regardless of the data. This is perverse, and ignores all of the research on selecting good bin sizes automatically, but sends a clear message to the user that they need to think about and experiment with the bin width.*
 
 Et bim !
 
@@ -1024,48 +828,41 @@ ggplot(penguins, aes(x = bill_length_mm, fill = species)) +
 
 Au fait, juste pour voir si on a compris le principe, comparons
 
-:::: {.columns}
-
-::: {.column}
+::: columns
+::: column
 ```{r}
 ggplot(penguins, aes(x = bill_length_mm)) + geom_histogram()
 ```
-::: 
+:::
 
-::: {.column}
+::: column
 ```{r}
 ggplot(penguins, aes(x = bill_length_mm)) + geom_bar(stat = "bin")
 ```
-::: 
+:::
+:::
 
-::::
-
-
-C'est la même chose ! Logique non ? Un histogramme n'est rien d'autre qu'un diagramme en bâtons prenant comme données le nombre de valeurs dans chaque  *bin*.
+C'est la même chose ! Logique non ? Un histogramme n'est rien d'autre qu'un diagramme en bâtons prenant comme données le nombre de valeurs dans chaque *bin*.
 
 ## Histogramme
 
 On peut ainsi s'amuser avec d'autres représentations graphiques de ces *counts*.
 
-
-
-:::: {.columns}
-
-::: {.column}
+::: columns
+::: column
 ```{r}
 ggplot(penguins, aes(x = bill_length_mm)) + geom_point(stat = "bin")
 ```
-::: 
+:::
 
-::: {.column}
+::: column
 ```{r}
 ggplot(penguins, aes(x = bill_length_mm)) + geom_line(stat = "bin")
 ```
-::: 
+:::
+:::
 
-::::
-
-## Diagramme en bâtons 
+## Diagramme en bâtons
 
 Puisque que je viens de voir passer `geom_bar`, je vais m'attarder un peu dessus pour représenter 2 variables qualitatives.
 
@@ -1073,49 +870,43 @@ Puisque que je viens de voir passer `geom_bar`, je vais m'attarder un peu dessus
 table(penguins$island, penguins$species)
 ```
 
-::: .fragment
-
+::: fragment
 ```{r}
 ggplot(penguins, aes(x=species, fill=island)) + geom_bar()
 ```
-
 :::
 
-## Diagramme en bâtons 
+## Diagramme en bâtons
 
 Puisque que je viens de voir passer `geom_bar`, je vais m'attarder un peu dessus pour représenter 2 variables qualitatives.
 
 ```{r}
 table(penguins$island, penguins$species)
 ```
-
 
 ```{r}
 ggplot(penguins, aes(x=species, fill=island)) + geom_bar(position = "dodge")
 ```
 
-
-## Diagramme en bâtons 
+## Diagramme en bâtons
 
 Puisque que je viens de voir passer `geom_bar`, je vais m'attarder un peu dessus pour représenter 2 variables qualitatives.
 
 ```{r}
 table(penguins$island, penguins$species)
 ```
-
 
 ```{r}
 ggplot(penguins, aes(x=species, fill=island)) + geom_bar(position = "fill")
 ```
 
-## Diagramme en bâtons 
+## Diagramme en bâtons
 
 Puisque que je viens de voir passer `geom_bar`, je vais m'attarder un peu dessus pour représenter 2 variables qualitatives.
 
 ```{r}
 table(penguins$island, penguins$species)
 ```
-
 
 ```{r}
 ggplot(penguins, aes(x=species, fill=sex)) + geom_bar(position = "dodge")
@@ -1126,6 +917,7 @@ ggplot(penguins, aes(x=species, fill=sex)) + geom_bar(position = "dodge")
 Je poursuis autour de la distribution des données avec la représentation de densité grâce à la fonction... devinez... `geom_density()`.
 
 Pour démarrer, c'est facile, maintenant on gère ça tranquillement.
+
 ```{r}
 ggplot(penguins, aes(x = bill_length_mm)) + geom_density()
 ```
@@ -1141,7 +933,7 @@ ggplot(penguins, aes(x = bill_length_mm, colour = species)) +
 
 ## Densité
 
-Pour avoir des lignes dans la légende on doit passer par `stat_density()` : 
+Pour avoir des lignes dans la légende on doit passer par `stat_density()` :
 
 ```{r}
 ggplot(penguins, aes(x = bill_length_mm, colour = species)) +
@@ -1261,16 +1053,25 @@ ggplot(penguins, aes(x = species, y = bill_length_mm)) +
 <!-- Alternatives au boxplot: -->
 
 <!-- ```{r} -->
+
 <!-- ggplot(penguins, aes(x = species, y = bill_length_mm)) + -->
+
 <!--    geom_point(alpha = 0.2, position = "jitter") +  -->
+
 <!--    stat_summary(fun = "median", geom = "point") -->
 
 <!-- if (require("Hmisc")) { -->
+
 <!--   ggplot(penguins, aes(x = species, y = bill_length_mm, shape = species)) +   -->
+
 <!--     geom_jitter(width = 0.2) + -->
+
 <!--     stat_summary(fun.data = mean_cl_normal, geom = "crossbar", -->
+
 <!--                  width = .5, color = "red") -->
+
 <!-- } -->
+
 <!-- ``` -->
 
 ## Jouons du violon
@@ -1284,7 +1085,6 @@ ggplot(penguins, aes(x = species, y = bill_length_mm)) +
              alpha = 0.2, position = "jitter")
 ```
 
-
 ## Jouons du violon
 
 Pour les mêmes en couleur, avec un peu de transparence sur les violons :
@@ -1295,7 +1095,6 @@ ggplot(penguins, aes(x = species, y = bill_length_mm)) +
   geom_jitter(aes(size =  bill_length_mm, colour = species),
              width = 0.2, alpha = 0.6)
 ```
-
 
 C'est presque trop facile.
 
@@ -1324,6 +1123,7 @@ Euh oui d'accord, c'est bien mais il sort d'où ce truc ? Et bien, il nous l'a d
 ## Les nuages de points : le retour
 
 Un peu trop lisse ?
+
 ```{r}
 MonNuage + geom_smooth(span = 0.2)
 ```
@@ -1350,7 +1150,7 @@ Et d'autres, voir `?geom_smooth`.
 
 Déclinons là-dessus ce que l'on sait faire.
 
-- En facettes :
+-   En facettes :
 
 ```{r eval=FALSE}
 MonNuage + geom_smooth() + facet_wrap(~species)
@@ -1377,7 +1177,6 @@ MonNuage + geom_smooth() + facet_wrap(~species, scale = "free_x")
 MonNuage + geom_smooth() + facet_wrap(~species, scale = "free_y")
 ```
 
-
 ```{r echo=F,message=F,warning=F,fig.align='center',fig.width=14}
 p1.MonNuage <- MonNuage + geom_smooth() + facet_wrap(~species, scale = "free")
 p2.MonNuage <- MonNuage + geom_smooth() + facet_wrap(~species, scale = "free_x")
@@ -1389,7 +1188,7 @@ p1.MonNuage | p2.MonNuage | p3.MonNuage
 
 ## Les nuages de points : le retour
 
-- En couleurs
+-   En couleurs
 
 ```{r}
 MonNuage + aes(colour = species) + geom_smooth()
@@ -1415,7 +1214,6 @@ Remarque: On peut faire de l'extrapolation (seulement avec la méthode `lm`):
 MonNuage + aes(colour = species) + geom_smooth(method = "lm", fullrange = TRUE)
 ```
 
-
 ## Un petit truc pour parler des systèmes de coordonnées ou comment réaliser un camembert ?
 
 On peut apprécier ou pas les diagrammes circulaires ou camembert ou *pie chart*, mais ce serait bien de savoir en faire avec `ggplot2`. Cherchez bien dans l'aide, vous ne trouverez pas de fonction `geom_pie()`.
@@ -1439,12 +1237,12 @@ barplot(table(penguins$species))
 ## Un petit truc pour parler des systèmes de coordonnées ou comment réaliser un camembert ?
 
 Ouais, c'est quand même un peu tristounet. Mais les diagrammes en bâtons, je sais faire avec `ggplot2`
- 
+
 ```{r}
 ggplot(penguins, aes(x = species)) + geom_bar()
 ```
 
-Et là, révélation ! Un diagramme circulaire, c'est un diagramme en bâtons ! euh, non... Mais si, mais dans un repère de coordonnées polaires ! Ah, oui, euh, peut-être... [Sceptique].
+Et là, révélation ! Un diagramme circulaire, c'est un diagramme en bâtons ! euh, non... Mais si, mais dans un repère de coordonnées polaires ! Ah, oui, euh, peut-être... \[Sceptique\].
 
 > HW a dit : *In the grammar, a pie chart is a stacked bar geom drawn in a polar coordinate system.*
 
@@ -1455,7 +1253,6 @@ ggplot(penguins, aes(x = species)) + geom_bar() + coord_polar()
 ```
 
 ## Un petit truc pour parler des systèmes de coordonnées ou comment réaliser un camembert ?
-
 
 Ah oui ! Bizarre non ? OK, on arrange un peu tout ça.
 
@@ -1468,7 +1265,6 @@ ggplot(penguins, aes(x = species, fill = species)) +
 Tada !
 
 En fait, c'était juste pour parler de systèmes de coordonnées...
-
 
 ## Et si je veux changer de style
 
@@ -1492,7 +1288,6 @@ p4 <-MonNuageTest + theme_gray()
 
 p1 + p2 + p3 + p4
 ```
-
 
 ## Jouons maintenant avec les échelles
 
@@ -1522,6 +1317,42 @@ MonNuage + scale_x_continuous(name = "Longueur de nageoire (mm)",
 
 Question : comment modifier l'axe des ordonnées ? Il serait quasiment insultant de fournir ici une réponse à cette question.
 
+
+## Comment zoomer ou changer les axes dans `ggplot2`
+
+::: callout-caution
+## Important !!
+
+**Pour zoomer, toujours utiliser `coord_cartesian`, et surtout pas `xlim`, `ylim`, ou `scale_*`**
+:::
+
+::: columns
+::: column
+```{r}
+
+p_boxplot <- ggplot(penguins, aes(x = species, y = bill_length_mm)) +
+  geom_boxplot() +
+  geom_point(aes(size = bill_depth_mm),
+             alpha = 0.2, position = "jitter")
+
+p_boxplot_1 <- p_boxplot + ylim(c(40,50))
+```
+:::
+
+::: column
+```{r}
+p_boxplot_2 <- p_boxplot +
+  coord_cartesian(ylim=c(40,50))
+```
+:::
+:::
+
+```{r,fig.height=6,fig.width=16,fig.align='center',echo=F}
+require(patchwork)
+(p_boxplot + ggtitle("base plot")+ geom_hline(yintercept = c(40,50),linetype="dashed")) + (p_boxplot_1  + ggtitle("with ylim")) + (p_boxplot_2 + ggtitle("with coord_cartesian")) & theme(legend.position ="bottom")
+```
+
+
 ## Jouons maintenant avec les échelles
 
 #### Les échelles log
@@ -1532,7 +1363,6 @@ Question : comment modifier l'axe des ordonnées ? Il serait quasiment insultant
 MonNuage + aes(x = flipper_length_mm^2, y = bill_length_mm^3) +
   scale_x_log10() + scale_y_log10()
 ```
-
 
 ## Mais il y a aussi les légendes (?!)
 
@@ -1546,7 +1376,6 @@ MonNuageCouleur
 ```
 
 Comme dit et re-dit précédemment, à chaque `aesthetics` est associée une échelle. On a ajouté l'aesthetics colour, donc il y a une échelle associée.
-
 
 ## Mais il y a aussi les légendes (?!)
 
@@ -1570,9 +1399,7 @@ p2 <- MonNuageCouleur + scale_colour_brewer(palette = "Set3")
 p1|p2
 ```
 
-
 ## Mais il y a aussi les légendes (?!)
-
 
 ou d'autres fonctions
 
@@ -1587,7 +1414,6 @@ p2 <- MonNuageCouleur + scale_colour_hue(l = 50, c = 30)
 p1|p2
 ```
 
-
 ## Mais il y a aussi les légendes (?!)
 
 Et pour mettre ses couleurs favorites, on peut même le faire à la main.
@@ -1600,7 +1426,6 @@ MonNuageCouleur +
 En cas de manque d'inspiration, la fonction `colours()` est là.
 
 #### Pour des couleurs liées à une variable qualitative
-
 
 ## Mais il y a aussi les légendes (?!)
 
@@ -1630,7 +1455,6 @@ p2 <- MonNuageCouleurQuanti + scale_colour_distiller(palette = "Purples")
 p1|p2
 ```
 
-
 ## Mais il y a aussi les légendes (?!)
 
 Pas mal, mais je ne vois pas bien les points les plus clairs. Pas de problème, je vais passer en `theme_dark`.
@@ -1642,13 +1466,10 @@ MonNuageCouleurQuanti +
   theme_dark()
 ```
 
-
-##
+## 
 
 ::: columns
 ::: {.column width="50%"}
-
-
 On peut aussi récupérer d'autres palettes de R
 
 ```{r }
@@ -1670,13 +1491,10 @@ MonNuageCouleurQuanti + scale_colour_gradient(low = "red", high = "blue")
 :::
 :::
 
-
-##
+## 
 
 ::: columns
 ::: {.column width="50%"}
-
-
 On peut aussi récupérer d'autres palettes de R
 
 ```{r }
@@ -1699,8 +1517,6 @@ MonNuageCouleurQuanti +
 :::
 :::
 
-
-
 ## Pour des formes aussi !
 
 A un `aesthetic` correspond une échelle, donc si mon `aesthetic` est une forme, alors une échelle lui est associée (pas de discrimination !) et on peut donc la modifier avec les fonctions `scale_shape_*()`.
@@ -1711,7 +1527,6 @@ MonNuageForme + scale_shape(solid = FALSE)
 MonNuageForme + scale_shape_manual(values = c(4, 8, 15))
 MonNuageForme + scale_shape_manual(values = c("*", "@", "x"))
 ```
-
 
 ```{r}
 #| echo: false
@@ -1743,84 +1558,39 @@ MonNuageCouleur + ggtitle("Mon joli graphique") +
                                   hjust = 0.5))       # centrage du titre
 ```
 
-
-
-## Comment zoomer ou changer les axes dans `ggplot2`
-
-
-::: {.callout-caution}
-## Important !!
-__Use `coord_cartesian` to zoom, not `xlim`, `ylim`, or `scale_*`__
-:::
-
-
-:::: .columns
-
-::: .column
-```{r}
-
-p_boxplot <- ggplot(penguins, aes(x = species, y = bill_length_mm)) +
-  geom_boxplot() +
-  geom_point(aes(size = bill_depth_mm),
-             alpha = 0.2, position = "jitter")
-
-p_boxplot_1 <- p_boxplot + ylim(c(40,50))
-```
-:::
-
-::: .column
-```{r}
-p_boxplot_2 <- p_boxplot +
-  coord_cartesian(ylim=c(40,50))
-```
-:::
-
-::::
-
-```{r,fig.height=6,fig.width=16,fig.align='center',echo=F}
-require(patchwork)
-(p_boxplot + ggtitle("base plot")+ geom_hline(yintercept = c(40,50),linetype="dashed")) + (p_boxplot_1  + ggtitle("with ylim")) + (p_boxplot_2 + ggtitle("with coord_cartesian")) & theme(legend.position ="bottom")
-```
-
-
-
-
 ## Mon graphique est parfait, je veux le sauvegarder !
 
 Deux solutions possibles :
 
-- Je sauve l'objet dans mon environnement de travail : fonction  `save()`, en fait comme n'importe quel objet `R`. En fait, ça, on l'a déjà pratiqué.
+-   Je sauve l'objet dans mon environnement de travail : fonction `save()`, en fait comme n'importe quel objet `R`. En fait, ça, on l'a déjà pratiqué.
 
-- Je sauvegarde la figure dans un fichier graphique : fonction `ggsave()`. Consulter l'aide de `ggsave()` pour en savoir plus, mais ne vous attendez pas à de grandes surprises. Seule précaution à signaler : il faut réaliser le graphique, puis le sauvegarder (pas comme avec les fonctions `pdf()`, `jpeg()`, `png()` qu'il faut appeler avant de réaliser le graphique et qu'il faut ensuite fermer avec `dev.off()`).
+-   Je sauvegarde la figure dans un fichier graphique : fonction `ggsave()`. Consulter l'aide de `ggsave()` pour en savoir plus, mais ne vous attendez pas à de grandes surprises. Seule précaution à signaler : il faut réaliser le graphique, puis le sauvegarder (pas comme avec les fonctions `pdf()`, `jpeg()`, `png()` qu'il faut appeler avant de réaliser le graphique et qu'il faut ensuite fermer avec `dev.off()`).
 
 ```{r, eval = FALSE}
 ggsave("perfect!.png")
 ```
 
-
-
 ## Quelques extensions sympas
 
 ### A best-of:
 
-* {[patchwork](https://patchwork.data-imaginist.com/)}: Combine/Assemble ggplots.
-* {[ggforce](https://ggforce.data-imaginist.com/)}: Provide missing functionality to `ggplot2`.
-* {[ggtext](https://wilkelab.org/ggtext/)}: Improved text rendering support for `ggplot2`.
+-   {[patchwork](https://patchwork.data-imaginist.com/)}: Combine/Assemble ggplots.
+-   {[ggforce](https://ggforce.data-imaginist.com/)}: Provide missing functionality to `ggplot2`.
+-   {[ggtext](https://wilkelab.org/ggtext/)}: Improved text rendering support for `ggplot2`.
 
 ### Interactive packages
 
-* {[ggedit](https://github.com/yonicd/ggedit)}: Interactively edit ggplot layers, scales and themes aesthetics.
-* {[esquisse](https://github.com/dreamRs/esquisse)}: Interactively explore your data by visualizing it with the ggplot2 package.
+-   {[plotly](https://plotly.com/r/)}: makes interactive, publication-quality graphs (with `ggplot2` or not).
+-   {[ggedit](https://github.com/yonicd/ggedit)}: Interactively edit ggplot layers, scales and themes aesthetics.
+-   {[esquisse](https://github.com/dreamRs/esquisse)}: Interactively explore your data by visualizing it with the ggplot2 package.
 
 ### Other useful packages
 
-* Themes:  {[ggthemr](https://github.com/Mikata-Project/ggthemr)} and {[ggthemes](https://jrnold.github.io/ggthemes/reference/index.html)}.
-* Colors: {[MetBrewer](https://github.com/BlakeRMills/MetBrewer/tree/main)}.
-* Put statistics on `ggplot2`: {[ggpubr](https://rpkgs.datanovia.com/ggpubr/)} and {[ggstatsplot](https://github.com/IndrajeetPatil/ggstatsplot)}.
-
+-   Themes: {[ggthemr](https://github.com/Mikata-Project/ggthemr)} and {[ggthemes](https://jrnold.github.io/ggthemes/reference/index.html)}.
+-   Colors: {[MetBrewer](https://github.com/BlakeRMills/MetBrewer/tree/main)}.
+-   Add statistics on `ggplot2`: {[ggpubr](https://rpkgs.datanovia.com/ggpubr/)} and {[ggstatsplot](https://github.com/IndrajeetPatil/ggstatsplot)}.
 
 ## Quelques extensions sympas
-
 
 ### Disposition de plusieurs graphiques
 
@@ -1830,7 +1600,7 @@ ggsave("perfect!.png")
 library(patchwork)
 ```
 
-Le package `patchwork` permet de disposer plusieurs graphiques de façon très simple. Démonstration avec des `+` et des `/' !
+Le package `patchwork` permet de disposer plusieurs graphiques de façon très simple. Démonstration avec des `+` et des `/` !
 
 ```{r fig.width=10}
 MonNuage + MonNuageCouleur
@@ -1838,7 +1608,6 @@ MonNuage + MonNuageCouleur
 
 ## Quelques extensions sympas
 
-
 ### Disposition de plusieurs graphiques
 
 #### `patchwork`
@@ -1847,7 +1616,7 @@ MonNuage + MonNuageCouleur
 library(patchwork)
 ```
 
-Le package `patchwork` permet de disposer plusieurs graphiques de façon très simple. Démonstration avec des `+` et des `/' !
+Le package `patchwork` permet de disposer plusieurs graphiques de façon très simple. Démonstration avec des `+` et des \`/' !
 
 ```{r}
 patchwork <- (MonNuage + MonNuageCouleur) / MonNuageForme
@@ -1875,19 +1644,18 @@ ou au contraire de les superposer
 MonNuageCouleur + inset_element(MonNuage, left = 0.6, bottom = 0.5, right = 1, top  = 0.85)
 ```
 
-
 Pour en apprendre plus : <https://patchwork.data-imaginist.com/articles/patchwork.html>
 
 ## `patchwork`
 
 ### Useful commands:
 
-* Combine plots with `+`, `|` or `/`.
-* Affect all plots with `&`: `(p1 | p2) / p3 & theme(legend.position="bottom")`.
-* Control the grid with `plot_layout()`.
-* Add annotation and style with `plot_annotation()`.
-* Insert a plot inside another with `inset_element()`.
-* Add blank area with `plot_spacer()`.
+-   Combine plots with `+`, `|` or `/`.
+-   Affect all plots with `&`: `(p1 | p2) / p3 & theme(legend.position="bottom")`.
+-   Control the grid with `plot_layout()`.
+-   Add annotation and style with `plot_annotation()`.
+-   Insert a plot inside another with `inset_element()`.
+-   Add blank area with `plot_spacer()`.
 
 ## `cowplot`
 
@@ -1895,10 +1663,9 @@ Pour en apprendre plus : <https://patchwork.data-imaginist.com/articles/patchwor
 library(cowplot)
 ```
 
-- Pour changer de thème
+-   Pour changer de thème
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### `theme_cowplot()`
 
 ```{r fig.width=10}
@@ -1916,12 +1683,11 @@ MonNuageCouleur + theme_minimal_grid()
 ```{r fig.width=10}
 MonNuageCouleur + theme_minimal_hgrid()
 ```
-
 :::
 
 ## `cowplot`
 
-- Pour disposer plusieurs graphiques (comme `patchwork`)
+-   Pour disposer plusieurs graphiques (comme `patchwork`)
 
 ```{r fig.width=10}
 plot_grid(MonNuageCouleurQuanti, MonNuageCouleur, labels = c('1', '2'))
@@ -1929,7 +1695,7 @@ plot_grid(MonNuageCouleurQuanti, MonNuageCouleur, labels = c('1', '2'))
 
 ## `cowplot`
 
-- Pour disposer plusieurs graphiques (comme `patchwork`)
+-   Pour disposer plusieurs graphiques (comme `patchwork`)
 
 ```{r fig.width=10}
 plot_grid(MonNuageCouleurQuanti, MonNuageCouleur, labels = "auto")
@@ -1937,7 +1703,7 @@ plot_grid(MonNuageCouleurQuanti, MonNuageCouleur, labels = "auto")
 
 ## `cowplot`
 
-- Pour disposer plusieurs graphiques (comme `patchwork`)
+-   Pour disposer plusieurs graphiques (comme `patchwork`)
 
 ```{r fig.width=10}
 plot_grid(MonNuageCouleurQuanti, MonNuageCouleur, labels = "AUTO")
@@ -1972,18 +1738,15 @@ plot_grid(MonNuageCouleurAxe, MonNuageCouleur, ncol = 1)
 plot_grid(MonNuageCouleurAxe, MonNuageCouleur, ncol = 1, align = "v")
 ```
 
-
 Pour en savoir plus : <https://cran.r-project.org/web/packages/cowplot/vignettes/introduction.html>
-
 
 ## `ggforce`
 
 A very complete package wich add a lot of missing features. Check the full list at https://ggforce.data-imaginist.com/reference/index.html.
 
-
-* `facet_zoom()`: Create a zoom facet for a plot.
-* `facet_matrix()`: Allow to put differents columns into different rows and columns in a grid of panels.
-* `geom_mark_*`: Graphical annotation of data.
+-   `facet_zoom()`: Create a zoom facet for a plot.
+-   `facet_matrix()`: Allow to put differents columns into different rows and columns in a grid of panels.
+-   `geom_mark_*`: Graphical annotation of data.
 
 ## `ggforce`
 
@@ -1994,7 +1757,6 @@ ggplot(penguins, aes(bill_length_mm, flipper_length_mm, colour = species)) +
     facet_zoom(xy = species == "Adelie")
 ```
 
-
 ## `ggforce::facet_zoom()`
 
 ```{r,fig.align='center',fig.height=6,fig.width=12}
@@ -2002,8 +1764,6 @@ ggplot(penguins, aes(bill_length_mm, flipper_length_mm, colour = species)) +
     geom_point() +
   facet_zoom(xlim = c(40, 50))
 ```
-
-
 
 ## `ggforce::facet_zoom()` for my zooming issue
 
@@ -2016,10 +1776,7 @@ p_boxplot <- ggplot(penguins, aes(x = species, y = bill_length_mm)) +
 p_boxplot  +  facet_zoom(ylim = c(40,50))
 ```
 
-
-
 ## `ggforce::facet_matrix()`
-
 
 ```{r,fig.align='center',fig.height=6,fig.width=12}
 
@@ -2029,10 +1786,7 @@ ggplot(penguins %>% tidyr::drop_na(), aes(col = sex, fill = sex)) +
   facet_matrix(rows = vars(island:body_mass_g), layer.diag = 2)
 ```
 
-
-
 ## `ggforce::facet_matrix()`
-
 
 ```{r,fig.align='center',fig.height=6,fig.width=12}
 penguins %>% 
@@ -2041,31 +1795,23 @@ penguins %>%
   ggforce::facet_col(~island)
 ```
 
-
 ## `ggforce::facet_matrix()`
 
-:::: {.columns}
-
-::: {.column}
-
+::: columns
+::: column
 ```{r}
 iris
 ```
-
-
 :::
 
-::: {.column}
+::: column
 ```{r,fig.align='center',fig.height=6,fig.width=12}
 iris %>% ggplot() +
   geom_boxplot(aes(x = .panel_x, y = .panel_y, fill=Species)) +
   facet_matrix(rows = vars(-Species),cols = vars(Species))
 ```
 :::
-
-::::
-
-
+:::
 
 ## `ggforce::geom_mark_*()`
 
@@ -2093,6 +1839,129 @@ ggplot(penguins %>% drop_na(), aes(bill_depth_mm, body_mass_g)) +
 
 > From: https://ihaddadenfodil.com/post/it-s-a-bird-it-s-a-plane-it-s-a-ggforce-function/
 
+## `ggtext`: Improved text rendering support for ggplot2 by adding **Markdown** and **html** syntax.
+
+Origine du code et des images: [Laura Navarro](https://lauranavarroviz.wordpress.com/2020/08/01/palmer-penguins/)
+
+::: columns
+::: column
+```{r,eval=F}
+require(ggtext)
+labels <- c(
+  Adelie = "<img src='imgs/adelie.png'
+    width='80' /><br>Adelie",
+  Gentoo = "<img src='imgs/gentoo_1.png'
+    width='80' /><br>Gentoo",
+  Chinstrap = "<img src='imgs/chinstrap.png'
+    width='80' /><br>Chinstrap"
+)
+
+pggtext +
+  scale_x_discrete(
+    name = NULL,
+    labels = labels
+  ) +
+  theme(
+    axis.text.x = element_markdown()
+  )
+
+```
+:::
+
+::: column
+```{r,echo=F,fig.align='center',fig.height=6,fig.width=10}
+require(ggtext)
+labels <- c(
+  Adelie = "<img src='imgs/adelie.png'
+    width='80' /><br>Adelie",
+  Gentoo = "<img src='imgs/gentoo_1.png'
+    width='80' /><br>Gentoo",
+  Chinstrap = "<img src='imgs/chinstrap.png'
+    width='80' /><br>Chinstrap"
+)
+
+pggtext <- penguins %>% drop_na() %>% ggplot(aes(x=species,y = bill_length_mm, col = sex)) +
+  geom_boxplot() +
+  scale_color_manual(values = c("#66b3ff", "#8c8c8c"))+
+  ylab("length (mm)") +
+  xlab("Species") +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        legend.text = element_text(size = 11),
+        legend.title = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.title = element_text(color = "white", size = 10),
+        plot.title = element_text(size = 20),
+        plot.subtitle = element_text( size = 12, hjust = 1)
+  )
+
+pggtext +
+  scale_x_discrete(
+    name = NULL,
+    labels = labels
+  ) +
+  theme(
+    axis.text.x = element_markdown()
+  )
+
+```
+:::
+:::
+
+## `ggtext`: **Bold**, *italic* and [color]{style="color:red"} to `ggplot2`
+
+::: columns
+::: column
+```{r}
+#| code-line-numbers: "11,16"
+df_penguins <- penguins %>% 
+  select(species, bill_length_mm:flipper_length_mm,sex) %>% 
+  pivot_longer(bill_length_mm:flipper_length_mm) %>% 
+  drop_na(sex) %>% 
+  mutate(
+    name = name %>% 
+      str_replace_all("_", " ") %>% 
+      str_remove_all(pattern = " mm") %>% 
+      str_to_title()
+  ) %>%
+  mutate(name = glue::glue("**{name}** (*mm*)")) %>% 
+  mutate(my_color = case_when( 
+    sex == "male" ~ "#66b3ff", 
+    sex == "female" ~ "#8c8c8c"
+  )) %>%  
+  mutate(sex = glue::glue("<span style = 'color:{my_color};'>{sex}</span>"))
+
+df_penguins
+
+```
+:::
+
+::: column
+```{r eval=FALSE}
+
+p + theme(
+    axis.text.y   = element_markdown(),
+    legend.text = element_markdown(),
+    strip.text = element_markdown()
+  )
+
+```
+
+```{r,echo=F,fig.align='center',fig.height=6,fig.width=10}
+#| code-line-numbers: "8-10"
+df_penguins %>% ggplot(aes(x=name,y=value,col = sex,fill=after_scale(colorspace::lighten(color, .5)))) +
+  geom_bar(position="dodge",stat = "summary", fun = "mean") +
+  facet_wrap(~species,labeller = labeller(species = labels)) +
+  scale_color_manual(values = c("#66b3ff", "#8c8c8c"))+
+  theme_minimal() +theme(
+    axis.text.y   = element_markdown(),
+    legend.text = element_markdown(),
+    strip.text = element_markdown(),
+    legend.position = "bottom"
+  ) +coord_flip()
+```
+:::
+:::
 
 ## Interactivité
 
@@ -2100,10 +1969,9 @@ ggplot(penguins %>% drop_na(), aes(bill_depth_mm, body_mass_g)) +
 library(plotly)
 ```
 
-L'utilisation de `ggplot2` avec `plotly`  n'est pas obligatoire, mais maintenant que l'on connaît, on ne va quand même pas s'en priver.
+L'utilisation de `ggplot2` avec `plotly` n'est pas obligatoire, mais maintenant que l'on connaît, on ne va quand même pas s'en priver.
 
 Alors allons-y !
-
 
 ```{r}
 #| fig-align: center
@@ -2118,8 +1986,7 @@ Il n'y a plus qu'à promener sa souris sur le graphique pour voir ce que cela do
 
 En explorant un peu l'aide en ligne, on peut gérer ce qui apparaît sous le curseur de la souris quand on le déplace.
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ## Valeurs des coordonnées `x` et `y`
 
 ```{r}
@@ -2137,8 +2004,7 @@ ggplotly(MonNuageCouleur, tooltip = c("x","y"))
 #| fig-height: 4
 ggplotly(MonNuageCouleur, tooltip = c("colour"))
 ```
-
-::: 
+:::
 
 ## Interactivité
 
@@ -2147,6 +2013,7 @@ Et on peut bien sûr l'utiliser sur des graphiques autres que nuages de points.
 ```{r}
 #| fig-align: center
 #| fig-width: 8
+#| fig-height: 4
 MesBoxplots <- ggplot(penguins,aes(x=species, y=body_mass_g,
                                 colour=species)) + geom_boxplot()
 ggplotly(MesBoxplots)
@@ -2196,7 +2063,6 @@ et si on préfère l'ANOVA, pas de souci
 MonGraphiqueggpubr + stat_compare_means(method = "anova")
 ```
 
-
 ## *Publication ready plots*
 
 Jusqu'ici, pas de quoi sauter au plafond, on aurait gérer plus ou moins bien le truc avec un peu plus de code. En revanche, pour les comparaisons 2 à 2 , c'est quand même pas mal.
@@ -2220,7 +2086,7 @@ MonGraphiqueggpubr +
 
 ## *Publication ready plots*
 
-avec des étoiles selon le découpage indiqué dans l'aide de la fonction  `stat_compare_means` :
+avec des étoiles selon le découpage indiqué dans l'aide de la fonction `stat_compare_means` :
 
 ```{r}
 symnum.args <- list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, 1), symbols = c("****", "***", "**", "*", "ns"))
@@ -2242,19 +2108,211 @@ ggviolin(penguins, x = "species", y  = "body_mass_g",
 
 Et d'autres choses plus ou moins utiles à voir ici : <https://rpkgs.datanovia.com/ggpubr>
 
-
 ## Ressources
 
 Voici quelques liens pour étoffer le survol que nous venons de faire.
 
-- Le site web <https://ggplot2.tidyverse.org/>
+-   Le site web <https://ggplot2.tidyverse.org/>
 
-- La documentation <https://ggplot2.tidyverse.org/reference/>
+-   La documentation <https://ggplot2.tidyverse.org/reference/>
 
-- Le livre *ggplot2 Elegant Graphics for Data Analysis*  <https://ggplot2-book.org/>
+-   Le livre *ggplot2 Elegant Graphics for Data Analysis* <https://ggplot2-book.org/>
 
-- La cheatsheet de `ggplot2` <https://raw.githubusercontent.com/rstudio/cheatsheets/master/data-visualization.pdf>
+-   La cheatsheet de `ggplot2` <https://raw.githubusercontent.com/rstudio/cheatsheets/master/data-visualization.pdf>
 
-- Des packages de l'écosystème `ggplot2` <https://exts.ggplot2.tidyverse.org/gallery>
+-   Des packages de l'écosystème `ggplot2` <https://exts.ggplot2.tidyverse.org/gallery>
 
 ## Et maintenant, amusez-vous !
+
+## Tidy data
+
+> **Tidying:** structuring datasets to facilitate analysis.
+
+A tidy dataset :
+
+```{r out.width = "100%", fig.align = "center",echo=F}
+knitr::include_graphics("imgs/tidy-1.png")
+```
+
+## Why tidying a dataset ?
+
+```{r define, echo=F, message=FALSE, warning=FALSE}
+treatments <- 
+    data.frame(
+        treatment_a = sample(10:25,size = 3,replace = T),
+        treatment_b = sample(10:25,size = 3,replace = T),
+        treatment_c = sample(10:25,size = 3,replace = T)
+    )
+rownames(treatments) <- c("John Smith","Jane Doe","Mary Johnson")
+```
+
+```{r show1,results='asis',echo=F}
+treatments %>% kable(caption = "Typical presentation dataset") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+```{r boxplot1, echo=T, fig.height=3.5, fig.width=8,fig.align='center'}
+boxplot(treatments)
+```
+
+## Why tidying a dataset ?
+
+```{r,echo=T}
+treatments.2 <- t(treatments)
+```
+
+```{r, echo=F,results='asis'}
+kable(treatments.2,caption = "The same data but structured differently") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+```{r boxplot2, echo=T, fig.height=3.5, fig.width=8,fig.align='center'}
+
+boxplot(treatments.2)
+```
+
+## Why tidying a dataset ?
+
+```{r}
+treatments.3 <- tibble::rownames_to_column(treatments,var = "person")
+treatments.3 <- tidyr::pivot_longer(treatments.3,-person,names_to = "treatment",values_to = "result")
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE,results='asis'}
+treatments.3 %>% mutate(treatment = cell_spec(treatment, align = "c",background =factor(treatment,unique(treatments.3$treatment),RColorBrewer::brewer.pal(length(unique(treatments.3$treatment)), "Spectral")))) %>% mutate(person = cell_spec(person, align = "c",background =factor(person,unique(treatments.3$person),RColorBrewer::brewer.pal(length(unique(treatments.3$treatment)), "Set1")))) %>% 
+    mutate(result = cell_spec(result, align = "c",background ="black",color = "white")) %>% kable(caption = "An exemple of a tidy dataset",escape=F) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+## Why tidying a dataset ?
+
+```{r boxplot3, echo=TRUE, fig.height=5, fig.width=8, message=FALSE, warning=FALSE,fig.align='center'}
+boxplot(result~treatment,data=treatments.3)
+```
+
+## Why tidying a dataset ?
+
+```{r boxplot4, echo=TRUE, fig.height=5, fig.width=8, message=FALSE, warning=FALSE,fig.align='center'}
+boxplot(result~person,data=treatments.3)
+```
+
+## Why tidying a dataset ?
+
+```{r boxplot5, echo=TRUE, fig.height=5, fig.width=8, message=FALSE, warning=FALSE,fig.align='center'}
+boxplot(result~person+treatment,data=treatments.3)
+```
+
+## Read a dataset with base `R`
+
+```{r}
+read.table(file = "iris.tsv",sep="\t",header = T)
+```
+
+## Read a dataset with base `R`
+
+-   Return a `data.frame` object.
+-   `read.csv`, `read.csv2`, `read.delim` can also be used.
+-   Cannot read `.xsl` files (we have to use another package).
+
+## Read a dataset with `readr`
+
+```{r}
+read_tsv(file = "iris.tsv")
+```
+
+## Read a dataset with `readr`
+
+-   Return a `tibble` object.
+-   `read_csv`, `read_csv2`, `read_table` can also be used.
+-   `.xsl` files are managed by `readxl`, an other tidyverse package (not loaded by default).
+
+## Tibbles: `tibble::tibble()`
+
+**Pros:**
+
+-   Cells can contain list and data.frame.
+-   It never changes an input's type (i.e., no more `stringsAsFactors = FALSE`!).
+-   Can use not valid R variable names (`:)`) as column names.
+-   Refined print method that shows only the first 10 rows.
+
+**Cons:**
+
+-   It never uses `row.names()`.
+    -   use `tibble::rownames_to_column()`.
+
+## Data manipulation with `dplyr` and `tidyr`
+
+#### dplyr is a grammar of data manipulation, providing a consistent set of verbs that help you solve the most common data manipulation challenges:
+
+-   `mutate()` adds new variables that are functions of existing variables
+-   `select()` picks variables based on their names.
+-   `filter()` picks cases based on their values.
+-   `summarise()` reduces multiple values down to a single summary.
+-   `arrange()` changes the ordering of the rows.
+-   `group_by()` perform any operation "by group".
+
+#### Some examples :
+
+::: columns
+::: {.column width="50%"}
+```{r}
+summarise(iris,mean(Petal.Width))
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+summarise(group_by(iris,Species),mean(Petal.Width))
+```
+:::
+:::
+
+## Pipes
+
+**The pipe %\>%:**
+
+-   Come from the \textbf{magrittr} package by Stefan Milton Bache.
+-   Automatically loaded in tidyverse.
+-   Equivalent to `|` in `bash`
+
+```{bash echo=TRUE}
+cat iris.tsv | cut -f5 | sed 's/^./\U&/' | head
+```
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+read_tsv("iris.tsv",col_names = F) %>% pull(5) %>% str_to_title() %>% head
+```
+
+## Pipes vs no pipes : without pipe
+
+```{r,echo=FALSE}
+set.seed(123)
+```
+
+```{r histo1,echo=T, fig.height=3, fig.width=8,fig.align='center'}
+ex.dat <- rnorm(n = 1000,mean = 5,sd=1)
+sub.dat <- sample(ex.dat,size = 100,replace=F)
+hist(sub.dat)
+```
+
+## Pipes vs no pipes : without pipe
+
+```{r,echo=FALSE}
+set.seed(123)
+```
+
+```{r histo2,echo=T, fig.height=3, fig.width=8,fig.align='center'}
+hist(sample(rnorm(n = 1000,mean = 5,sd=1),size = 100,replace=F))
+```
+
+## Pipes vs no pipes : with pipe
+
+```{r,echo=FALSE}
+set.seed(123)
+```
+
+```{r histo3,echo=T, fig.height=3, fig.width=8,fig.align='center'}
+rnorm(n = 1000,mean = 5,sd=1) %>%
+    sample(size = 100,replace=F) %>%
+    hist()
+```
