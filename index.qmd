@@ -2068,18 +2068,71 @@ p_boxplot  +  facet_zoom(ylim = c(40,50))
 
 ```{r,fig.align='center',fig.height=6,fig.width=12}
 
-ggplot(penguins %>% drop_na(), aes(col = sex, fill = sex)) +
-  geom_autopoint() +
-  facet_matrix(rows = vars(island:body_mass_g),
-               switch = "x", layer.diag = 2) +
-  theme(axis.text.x = element_text(angle = 90)) +
-  geom_autohistogram()
-
-penguins %>% ggplot(aes(col=species,fill=species)) +
+ggplot(penguins %>% tidyr::drop_na(), aes(col = sex, fill = sex)) +
   geom_autopoint() +
   geom_autodensity() +
-  facet_matrix(vars(-species),layer.diag = 2)
+  facet_matrix(rows = vars(island:body_mass_g), layer.diag = 2)
 ```
+
+
+
+## `ggforce::facet_matrix()`
+
+
+```{r,fig.align='center',fig.height=6,fig.width=12}
+penguins %>% 
+  ggplot(aes(x=species,y=bill_length_mm,fill=species)) +
+  geom_boxplot() +
+  ggforce::facet_col(~island)
+```
+
+
+## `ggforce::facet_matrix()`
+
+:::: .columns
+
+::: .column
+iris
+:::
+
+::: .column
+```{r,fig.align='center',fig.height=6,fig.width=12}
+iris %>% ggplot() +
+  geom_boxplot(aes(x = .panel_x, y = .panel_y, fill=Species)) +
+  facet_matrix(rows = vars(-Species),cols = vars(Species))
+```
+:::
+
+::::
+
+
+
+## `ggforce::geom_mark_*()`
+
+```{r,fig.align='center',fig.height=6,fig.width=12}
+ggplot(penguins, aes(x = flipper_length_mm, y = bill_length_mm)) +
+  geom_mark_hull(aes(fill = species, label = species)) +
+  geom_point()
+```
+
+## `ggforce::geom_mark_*()`
+
+```{r,fig.align='center',fig.height=6,fig.width=12}
+ggplot(penguins %>% drop_na(), aes(bill_depth_mm, body_mass_g)) +
+  geom_point() +
+  geom_mark_rect(aes(filter = species == "Gentoo", 
+                        label = "Gentoo", 
+                        description = "Gentoo penguins seem quite different from the other species"),
+                        label.fill = "pink",
+                        label.colour = "red", 
+                        con.colour = "red",
+                        con.linetype = 2, 
+                        expand = unit(0.01, "mm"), 
+                        fill = "pink") 
+```
+
+> From: https://ihaddadenfodil.com/post/it-s-a-bird-it-s-a-plane-it-s-a-ggforce-function/
+
 
 
 ## Interactivité
