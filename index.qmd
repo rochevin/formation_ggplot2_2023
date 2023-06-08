@@ -174,9 +174,10 @@ p4.training <- filter(data_progression,order<=4) %>% ggplot(aes(order,rank,label
 print(p0.training)
 ```
 
--   Slides : https://rochevin.github.io/formation_ggplot2
--   Download slides and data: https://github.com/rochevin/formation_ggplot2/archive/refs/heads/main.zip
--   Compagnon wiki: https://github.com/rochevin/formation_ggplot2/wiki
+-   Slides : [https://rochevin.github.io/formation_ggplot2_2023](https://rochevin.github.io/formation_ggplot2_2023)
+-   Download slides and data: [https://github.com/rochevin/formation_ggplot2_2023/archive/refs/heads/main.zip](https://github.com/rochevin/formation_ggplot2_2023/archive/refs/heads/main.zip)
+-   Print to pdf: [https://rochevin.github.io/formation_ggplot2_2023/?print-pdf#/title-slide](https://rochevin.github.io/formation_ggplot2_2023/?print-pdf#/title-slide)
+-   Compagnon wiki: [https://github.com/rochevin/formation_ggplot2_2023/wiki](https://github.com/rochevin/formation_ggplot2_2023/wiki)
 
 ## Why `ggplot2` instead of base plot ?
 
@@ -1317,7 +1318,6 @@ MonNuage + scale_x_continuous(name = "Longueur de nageoire (mm)",
 
 Question : comment modifier l'axe des ordonnées ? Il serait quasiment insultant de fournir ici une réponse à cette question.
 
-
 ## Comment zoomer ou changer les axes dans `ggplot2`
 
 ::: callout-caution
@@ -1351,7 +1351,6 @@ p_boxplot_2 <- p_boxplot +
 require(patchwork)
 (p_boxplot + ggtitle("base plot")+ geom_hline(yintercept = c(40,50),linetype="dashed")) + (p_boxplot_1  + ggtitle("with ylim")) + (p_boxplot_2 + ggtitle("with coord_cartesian")) & theme(legend.position ="bottom")
 ```
-
 
 ## Jouons maintenant avec les échelles
 
