@@ -796,9 +796,16 @@ Histogramme + facet_wrap(~species)
 
 -   et aussi des couleurs (même si l'interprétation n'en est pas forcément améliorée)
 
-```{r }
+```{r eval=F}
 Histogramme + aes(colour = species)
 Histogramme + aes(fill = species)
+```
+
+```{r echo=F}
+require(patchwork)
+p1.hist <- Histogramme + aes(colour = species)
+p2.hist <- Histogramme + aes(fill = species)
+p1.hist + p2.hist
 ```
 
 ## Histogramme
@@ -1424,9 +1431,7 @@ MonNuageCouleur +
 
 En cas de manque d'inspiration, la fonction `colours()` est là.
 
-#### Pour des couleurs liées à une variable qualitative
-
-## Mais il y a aussi les légendes (?!)
+## Pour des couleurs liées à une variable quantitative
 
 Et pour une légende en couleur liée à une variable quantitative, comment ça marche ? Pareil !
 
@@ -1504,7 +1509,7 @@ MonNuageCouleurQuanti + scale_colour_gradientn(colors = terrain.colors(5))
 :::
 
 ::: {.column width="50%"}
-::: fragment
+
 et faire en fait tout ce que l'on veut ! (mais ça, on le savait déjà).
 
 ```{r}
@@ -1512,7 +1517,7 @@ MonNuageCouleurQuanti +
   scale_colour_gradient(low = "red", high = "blue", breaks = seq(12, 20, by = 3))
 
 ```
-:::
+
 :::
 :::
 
@@ -1544,6 +1549,8 @@ Et si je veux modifier quelques bricoles dans ma légende, aucun problème, je p
 MonNuageForme + scale_shape(name = "Espèces",
                             labels = c("Ad.","Ch.","Ge."))
 ```
+
+##
 
 Pour aller plus loin dans les modifications d'apparence de la légende (et d'autres choses, en fait de tout ce que l'on voit), il faut aller bricoler le thème... Ca devient très touchy et pas forcément d'une grande utilité, mais voyons quand même 2 ou 3 trucs. Un petit coup d'oeil à l'aide de la fonction `theme()` peut suffire à se convaincre de ne pas aller plus loin.
 
@@ -1621,7 +1628,7 @@ Le package `patchwork` permet de disposer plusieurs graphiques de façon très s
 patchwork <- (MonNuage + MonNuageCouleur) / MonNuageForme
 patchwork + 
   plot_layout(guides = "collect") +
-  plot_annotation(tag_levels = 'A')  & theme(legend.position = "bottom")
+  plot_annotation(tag_levels = 'A',title="un super graphique")  & theme(legend.position = "bottom")
 
 ```
 
@@ -1741,7 +1748,9 @@ Pour en savoir plus : <https://cran.r-project.org/web/packages/cowplot/vignettes
 
 ## `ggforce`
 
-A very complete package wich add a lot of missing features. Check the full list at https://ggforce.data-imaginist.com/reference/index.html.
+Une librairie très complète qui ajoute beaucoup de fonctionnalités manquantes à `ggplot2`.
+
+Voir ici : https://ggforce.data-imaginist.com/reference/index.html.
 
 -   `facet_zoom()`: Create a zoom facet for a plot.
 -   `facet_matrix()`: Allow to put differents columns into different rows and columns in a grid of panels.
