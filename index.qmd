@@ -1,7 +1,7 @@
 ---
 title: "Graphiques avec R : ggplot2"
 author: "Vincent ROCHER & Sébastien Déjean"
-date: "9/06/2023"
+date: "15/05/2025"
 format: 
   revealjs:
     fontsize: 24px
@@ -760,7 +760,7 @@ MonPremierGraphiqueLeVrai + facet_grid(species ~ island)
 ### `island ~ species`
 
 ```{r fig.width = 5}
-MonPremierGraphiqueLeVrai + facet_grid()
+MonPremierGraphiqueLeVrai + facet_grid(island ~ species)
 ```
 
 ### `species ~ sex`
